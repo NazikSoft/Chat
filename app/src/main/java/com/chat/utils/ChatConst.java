@@ -9,8 +9,8 @@ import java.text.SimpleDateFormat;
 public class ChatConst {
 
     public static final String TAG = "log_tag";
-    public static final String USER_DATABASE_PATH = "userChat";
-    public static final String CHAT_DATABASE_PATH = "chat";
+    public static final String USER_DATABASE_PATH = "users";
+    public static final String CHAT_DATABASE_PATH = "chats";
 
     public final static int HANDLER_RECEIVE_MSG = 10101;
     public final static int HANDLER_USERS_LIST = 10102;

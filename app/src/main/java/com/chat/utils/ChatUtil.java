@@ -37,13 +37,13 @@ public class ChatUtil {
         imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getRootView().getWindowToken(), 0);
     }
 
-    public static void saveAuth(Activity activity, User user) {
-        SharedPreferences sPref = activity.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor ed = sPref.edit();
-        ed.putString(SAVED_LOGIN, user.getName());
-        ed.putString(SAVED_PASS, user.getPassword());
-        ed.commit();
-    }
+//    public static void saveAuth(Activity activity, User user) {
+//        SharedPreferences sPref = activity.getPreferences(Context.MODE_PRIVATE);
+//        SharedPreferences.Editor ed = sPref.edit();
+//        ed.putString(SAVED_LOGIN, user.getName());
+//        ed.putString(SAVED_PASS, user.getPassword());
+//        ed.commit();
+//    }
 
     public static User loadAuth(Activity activity) {
         SharedPreferences sPref = activity.getPreferences(Context.MODE_PRIVATE);
@@ -65,10 +65,10 @@ public class ChatUtil {
 
     }
 
-    public static boolean checkAuth(Activity activity) {
-        User user = loadAuth(activity);
-        return user.getName() != null && user.getPassword() != null;
-    }
+//    public static boolean checkAuth(Activity activity) {
+//        User user = loadAuth(activity);
+//        return user.getName() != null && user.getPassword() != null;
+//    }
 
     public static String toJson(Object o) {
         GsonBuilder builder = new GsonBuilder();

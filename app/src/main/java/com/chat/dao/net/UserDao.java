@@ -2,12 +2,16 @@ package com.chat.dao.net;
 
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.chat.dao.ObjectDao;
 import com.chat.entity.User;
 import com.chat.utils.ChatConst;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,6 +22,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -27,6 +32,7 @@ import java.util.List;
 
 public class UserDao extends ObjectDao {
 
+    private FirebaseAuth mFirebaseAuth;
     private FirebaseDatabase database;
     private DatabaseReference userRef;
     private String key;
@@ -36,16 +42,36 @@ public class UserDao extends ObjectDao {
         if (userRef == null) {
             database = FirebaseDatabase.getInstance();
             userRef = database.getReference(ChatConst.USER_DATABASE_PATH);
+            mFirebaseAuth = FirebaseAuth.getInstance();
         }
     }
 
-    public void save(User user) {
+    // sign in with email and password
+    public void signInWithEmail(final String email, String password) {
+        mFirebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    User user = new User(email, FirebaseInstanceId.getInstance().getToken(), new Date().getTime());
+                    save(user);
+                } else {
+                    error(ChatConst.HANDLER_RESULT_ERR);
+                }
+            }
+        });
+    }
+
+    public boolean isUserLogged() {
+        return mFirebaseAuth.getCurrentUser() != null;
+    }
+
+    private void save(User user) {
         if (user == null) {
             error(ChatConst.HANDLER_RESULT_ERR);
             return;
         }
-        final String key = userRef.push().getKey();
-        user.setObjectId(key);
+        user.setObjectId(mFirebaseAuth.getCurrentUser().getUid());
+        final String key = user.getObjectId();
 
         userRef.child(key).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

@@ -10,7 +10,6 @@ import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,13 +33,9 @@ import android.widget.Toast;
 
 import com.chat.R;
 import com.chat.dao.net.UserDao;
-import com.chat.entity.User;
-import com.chat.utils.ChatUtil;
 import com.chat.utils.ChatConst;
-import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -55,17 +50,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private List<String> DUMMY_CREDENTIALS;
-
     private static final String TAG = "log_tag";
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -78,10 +63,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        if (ChatUtil.checkAuth(this)) {
+
+        dao = new UserDao(handler);
+        if (dao.isUserLogged()) {
             toMain();
-        } else {
-            dao = new UserDao(handler);
         }
 
         // Set up the login form.
@@ -89,17 +74,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                Log.i(TAG, "onEditorAction " + id + "  " + keyEvent);
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+//                Log.i(TAG, "onEditorAction " + id + "  " + keyEvent);
+//                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+//                    attemptLogin();
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -117,10 +102,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what == ChatConst.HANDLER_USERS_LIST) {
-                DUMMY_CREDENTIALS = new ArrayList<>();
-                for (User u : (List<User>) msg.obj)
-                    DUMMY_CREDENTIALS.add(u.getName() + ":" + u.getPassword());
+            switch (msg.what) {
+                case ChatConst.HANDLER_RESULT_OK:
+                    showProgress(false);
+                    toMain();
+                    break;
+
+                case ChatConst.HANDLER_RESULT_ERR:
+                    Toast.makeText(LoginActivity.this, "Invalid email or pass", Toast.LENGTH_LONG).show();
+                    break;
             }
         }
     };
@@ -175,9 +165,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
+//        if (mAuthTask != null) {
+//            return;
+//        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -216,8 +206,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            dao.signInWithEmail(email, password);
+//            mAuthTask = new UserLoginTask(email, password);
+//            mAuthTask.execute((Void) null);
         }
     }
 
@@ -319,68 +310,69 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(600);
-            } catch (InterruptedException e) {
-                return false;
-            }
-            if (DUMMY_CREDENTIALS != null)
-                for (String credential : DUMMY_CREDENTIALS) {
-                    String[] pieces = credential.split(":");
-                    if (pieces[0].equals(mEmail)) {
-                        // Account exists, return true if the password matches.
-                        return pieces[1].equals(mPassword);
-                    }
-                }
-
-            // TODO: register the new account here.
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-            User user = new User(mEmail, mPassword, FirebaseInstanceId.getInstance().getToken(),new Date().getTime());
-            if (success) {
-                dao.update(user);
-                Toast.makeText(LoginActivity.this, "Пользователь найден", Toast.LENGTH_LONG).show();
-            } else {
-//                mPasswordView.setError(getString(R.string.error_incorrect_password));
-//                mPasswordView.requestFocus();
-                dao.save(user);
-                Toast.makeText(LoginActivity.this, "Пользователь зарегистрирован", Toast.LENGTH_LONG).show();
-            }
-            Log.i(TAG, "Auth: " + user.toString());
-            ChatUtil.saveAuth(LoginActivity.this, user);
-            toMain();
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
+//    /**
+//     * Represents an asynchronous login/registration task used to authenticate
+//     * the user.
+//     */
+//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+//
+//        private final String mEmail;
+//        private final String mPassword;
+//
+//        UserLoginTask(String email, String password) {
+//            mEmail = email;
+//            mPassword = password;
+//        }
+//
+//        @Override
+//        protected Boolean doInBackground(Void... params) {
+//            // TODO: attempt authentication against a network service.
+//
+//            try {
+//                // Simulate network access.
+//                Thread.sleep(600);
+//            } catch (InterruptedException e) {
+//                return false;
+//            }
+//            if (DUMMY_CREDENTIALS != null)
+//                for (String credential : DUMMY_CREDENTIALS) {
+//                    String[] pieces = credential.split(":");
+//                    if (pieces[0].equals(mEmail)) {
+//                        // Account exists, return true if the password matches.
+//                        return pieces[1].equals(mPassword);
+//                    }
+//                }
+//
+//            // TODO: register the new account here.
+//
+//            return false;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(final Boolean success) {
+//            mAuthTask = null;
+//            showProgress(false);
+//            User user = new User(mEmail, mPassword, FirebaseInstanceId.getInstance().getToken(),new Date().getTime());
+//            if (success) {
+//                dao.update(user);
+//                Toast.makeText(LoginActivity.this, "Пользователь найден", Toast.LENGTH_LONG).show();
+//            } else {
+////                mPasswordView.setError(getString(R.string.error_incorrect_password));
+////                mPasswordView.requestFocus();
+//                dao.save(user);
+//                Toast.makeText(LoginActivity.this, "Пользователь зарегистрирован", Toast.LENGTH_LONG).show();
+//            }
+//            Log.i(TAG, "Auth: " + user.toString());
+//            ChatUtil.saveAuth(LoginActivity.this, user);
+//            toMain();
+//        }
+//
+//        @Override
+//        protected void onCancelled() {
+//            mAuthTask = null;
+//            showProgress(false);
+//        }
+//    }
 
     private void toMain() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

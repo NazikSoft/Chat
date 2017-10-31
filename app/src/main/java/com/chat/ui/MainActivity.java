@@ -18,6 +18,8 @@ import com.chat.dao.net.UserDao;
 import com.chat.entity.Chat;
 import com.chat.entity.User;
 import com.chat.utils.ChatConst;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         userDao = new UserDao(handler);
         chatDao = new ChatDao(handler);
     }
+
 
     private void createAdapter(List<User> list) {
         adapter = new UserAdapter(list, handler);
