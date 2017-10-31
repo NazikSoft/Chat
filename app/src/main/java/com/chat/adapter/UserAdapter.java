@@ -47,6 +47,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         User user = userList.get(position);
         holder.textCircle.setText(String.valueOf(user.getName().charAt(0)).toUpperCase());
         holder.textName.setText(user.getName());
+//        holder.textLastMessage.setText(user.getLastMessage);
         if (user.getCountNewPost() != 0){
             holder.textCount.setVisibility(View.VISIBLE);
             holder.textCount.setText(user.getCountNewPost() + "");
@@ -76,6 +77,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         TextView textCircle;
         @BindView(R.id.textName)
         TextView textName;
+        @BindView(R.id.textLastMessage)
+        TextView textLastMessage;
         @BindView(R.id.textCount)
         TextView textCount;
 
@@ -88,7 +91,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
         @Override
         public void onClick(View view) {
-            User user = getItem(getPosition());
+            User user = getItem(getAdapterPosition());
             handler.obtainMessage(ChatConst.HANDLER_USER_OBJ, user.getToken()).sendToTarget();
         }
     }
