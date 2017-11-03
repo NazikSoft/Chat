@@ -12,9 +12,11 @@ public class ChatConst {
     public static final String USER_DATABASE_PATH = "users";
     public static final String CHAT_DATABASE_PATH = "chats";
 
+    public static final String COLUMN_CHAT_ROOMS = "chatRooms";
+
     public final static int HANDLER_RECEIVE_MSG = 10101;
     public final static int HANDLER_USERS_LIST = 10102;
-    public final static int HANDLER_USER_OBJ = 10103;
+    public final static int HANDLER_CLICK_RECYCLER_ITEM = 10103;
     public final static int HANDLER_RESULT_ERR = 10111;
     public final static int HANDLER_RESULT_OK = 10112;
     public final static int HANDLER_RESULT_COMPAMION_USER = 10113;

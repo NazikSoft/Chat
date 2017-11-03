@@ -47,23 +47,73 @@ public class UserDao extends ObjectDao {
     }
 
     // sign in with email and password
-    public void signInWithEmail(final String email, String password) {
+    public void signInWithEmail(final String email, final String password) {
         mFirebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    User user = new User(email, FirebaseInstanceId.getInstance().getToken(), new Date().getTime());
-                    save(user);
+                    success(ChatConst.HANDLER_RESULT_OK, getCurrentUserId());
                 } else {
-                    error(ChatConst.HANDLER_RESULT_ERR);
+                    createUserWithEmail(email,password);
                 }
             }
         });
     }
 
-    public boolean isUserLogged() {
-        return mFirebaseAuth.getCurrentUser() != null;
+    private void createUserWithEmail(final String email, String pass) {
+        mFirebaseAuth.createUserWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            User user = new User(email, FirebaseInstanceId.getInstance().getToken(), new Date().getTime());
+                            save(user);
+                        } else {
+                            error(ChatConst.HANDLER_RESULT_ERR);
+                        }
+                    }
+                });
     }
+
+    public static boolean isUserLogged() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
+
+    public static String getCurrentUserId() {
+        if (isUserLogged()) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return "";
+        }
+    }
+
+    public void getChatroomByUserId(String userId) {
+        userRef.child(userId)
+                .child(ChatConst.COLUMN_CHAT_ROOMS)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()) {
+                            error(ChatConst.HANDLER_RESULT_ERR);
+                            return;
+                        }
+
+                        List<String> result = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            String chatroomId = snapshot.getValue(String.class);
+                            if (chatroomId != null && !chatroomId.equals(""))
+                                result.add(chatroomId);
+                        }
+                        success(ChatConst.HANDLER_RESULT_OK, result);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
 
     private void save(User user) {
         if (user == null) {

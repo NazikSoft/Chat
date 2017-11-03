@@ -1,7 +1,12 @@
 package com.chat.entity;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by m on 22.09.2017.
@@ -12,9 +17,10 @@ public class User {
     private String objectId;
     private String name;
     private String token;
+    private String imgUrl;
     private int countNewPost;
     private long lastUpdate;
-    private List<String> chats = new ArrayList<>();
+    private Map<String,String> chatRooms = new HashMap<>();
 
     public User() {
     }
@@ -29,12 +35,25 @@ public class User {
         this.name = name;
     }
 
-    public List<String> getChats() {
-        return chats;
+    public void setChatRooms(Map<String, String> chatRooms) {
+        this.chatRooms = chatRooms;
     }
 
-    public void setChats(List<String> chats) {
-        this.chats = chats;
+    public Map<String,String> getChatRooms() {
+        return chatRooms;
+    }
+
+    @Exclude
+    public List<String> getChatRoomsList() {
+        return new ArrayList<>(chatRooms.keySet());
+    }
+
+    @Exclude
+    public void setChatRoomsList(List<String> chatRooms) {
+       chatRooms.clear();
+        for (String chatRoom : chatRooms) {
+           this.chatRooms.put(chatRoom, "");
+        }
     }
 
     public String getObjectId() {
@@ -75,6 +94,14 @@ public class User {
 
     public void setLastUpdate(long lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     @Override

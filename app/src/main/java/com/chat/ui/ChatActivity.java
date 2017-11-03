@@ -1,6 +1,7 @@
 package com.chat.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -36,6 +37,8 @@ public class ChatActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         createMenu();
 
+//        Intent intent = getIntent();
+//        intent.getParcelableExtra()
     }
 
     public static void setTitle(Activity activity, String title) {

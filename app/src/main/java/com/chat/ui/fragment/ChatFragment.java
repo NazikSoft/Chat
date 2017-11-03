@@ -38,6 +38,7 @@ import com.chat.ui.ChatActivity;
 import com.chat.utils.ChatConst;
 import com.chat.utils.ChatUtil;
 import com.chat.utils.PermissionUtil;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 import java.util.Date;

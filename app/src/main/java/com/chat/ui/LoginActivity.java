@@ -34,6 +34,9 @@ import android.widget.Toast;
 import com.chat.R;
 import com.chat.dao.net.UserDao;
 import com.chat.utils.ChatConst;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,14 +61,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private UserDao dao;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        initHandler();
         dao = new UserDao(handler);
-        if (dao.isUserLogged()) {
+//        FirebaseAuth.getInstance().signOut();
+        if (UserDao.isUserLogged()) {
             toMain();
         }
 
@@ -98,23 +104,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case ChatConst.HANDLER_RESULT_OK:
-                    showProgress(false);
-                    toMain();
-                    break;
+    private void initHandler() {
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case ChatConst.HANDLER_RESULT_OK:
+                        showProgress(false);
+                        toMain();
+                        break;
 
-                case ChatConst.HANDLER_RESULT_ERR:
-                    Toast.makeText(LoginActivity.this, "Invalid email or pass", Toast.LENGTH_LONG).show();
-                    break;
+                    case ChatConst.HANDLER_RESULT_ERR:
+                        showProgress(false);
+                        Toast.makeText(LoginActivity.this, "Invalid email or pass", Toast.LENGTH_LONG).show();
+                        break;
+                }
             }
-        }
-    };
-
+        };
+    }
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
             return;
@@ -375,7 +383,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //    }
 
     private void toMain() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        Intent intent = new Intent(LoginActivity.this, TempActivity.class);
+//        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

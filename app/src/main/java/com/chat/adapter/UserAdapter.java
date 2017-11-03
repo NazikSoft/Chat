@@ -2,18 +2,19 @@ package com.chat.adapter;
 
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chat.R;
-import com.chat.entity.Chat;
+import com.chat.dao.net.UserDao;
+import com.chat.entity.ChatRoom;
 import com.chat.entity.User;
 import com.chat.utils.ChatConst;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,17 +24,17 @@ import butterknife.ButterKnife;
  */
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
-    private List<User> userList;
+    private List<ChatRoom> chatRooms;
     private Handler handler;
 
 
-    public UserAdapter(List<User> list, Handler handler) {
-        this.userList = list;
+    public UserAdapter(List<ChatRoom> list, Handler handler) {
+        this.chatRooms = list;
         this.handler = handler;
     }
 
-    public User getItem(int position) {
-        return userList.get(position);
+    public ChatRoom getItem(int position) {
+        return chatRooms.get(position);
     }
 
     @Override
@@ -44,31 +45,30 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.textCircle.setText(String.valueOf(user.getName().charAt(0)).toUpperCase());
-        holder.textName.setText(user.getName());
-//        holder.textLastMessage.setText(user.getLastMessage);
-        if (user.getCountNewPost() != 0){
+        ChatRoom chatRoom = chatRooms.get(position);
+        holder.textCircle.setText(String.valueOf(chatRoom.getTitle().charAt(0)).toUpperCase());
+        holder.textName.setText(chatRoom.getTitle());
+        holder.textLastMessage.setText(chatRoom.getLastMessage().getText());
+        int unreadMessageCount = getPostsCount(chatRoom);
+        if (unreadMessageCount != 0) {
             holder.textCount.setVisibility(View.VISIBLE);
-            holder.textCount.setText(user.getCountNewPost() + "");
+            holder.textCount.setText(unreadMessageCount + "");
+        }else {
+            holder.textCount.setVisibility(View.INVISIBLE);
+            holder.textCount.setText("");
         }
     }
 
-    public void setPostsCount(List<Chat> postsCount) {
-        for (Chat c : postsCount) {
-            for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getToken().equals(c.getCompanionToken()) && !c.isRead()){
-                    userList.get(i).setCountNewPost(userList.get(i).getCountNewPost() + 1);
-                    Log.i("log_tag", "setPostsCount: "+c.getObjectId());
-                }
-            }
-        }
-        notifyDataSetChanged();
+    public int getPostsCount(ChatRoom chatRoom) {
+        int chatMessageCount = chatRoom.getMessages().size();
+        Map<String, Integer> map = chatRoom.getUserReadMessageCount();
+        int userReadMessage = map.get(UserDao.getCurrentUserId());
+        return chatMessageCount-userReadMessage;
     }
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        return chatRooms.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -91,8 +91,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
         @Override
         public void onClick(View view) {
-            User user = getItem(getAdapterPosition());
-            handler.obtainMessage(ChatConst.HANDLER_USER_OBJ, user.getToken()).sendToTarget();
+            ChatRoom chatRoom = getItem(getAdapterPosition());
+            handler.obtainMessage(ChatConst.HANDLER_CLICK_RECYCLER_ITEM, chatRoom).sendToTarget();
         }
     }
 }
