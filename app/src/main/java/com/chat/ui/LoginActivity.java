@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         initHandler();
         dao = new UserDao(handler);
-//        FirebaseAuth.getInstance().signOut();
         if (UserDao.isUserLogged()) {
             toMain();
         }
@@ -127,7 +126,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (!mayRequestContacts()) {
             return;
         }
-
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -383,8 +381,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //    }
 
     private void toMain() {
-        Intent intent = new Intent(LoginActivity.this, TempActivity.class);
-//        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//        Intent intent = new Intent(LoginActivity.this, TempActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

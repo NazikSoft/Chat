@@ -18,6 +18,7 @@ import com.chat.dao.net.UserDao;
 import com.chat.entity.ChatRoom;
 import com.chat.utils.ChatConst;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void createAdapter(List<ChatRoom> list) {
-        adapter = new UserAdapter(list, handler);
+        adapter = new UserAdapter(this, list, handler);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -72,10 +73,15 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Connection error", Toast.LENGTH_LONG).show();
                         break;
 
-                        // click recycler view list item
+                    // click recycler view list item
                     case ChatConst.HANDLER_CLICK_RECYCLER_ITEM:
+                        ChatRoom chatRoom = (ChatRoom) msg.obj;
+                        if (chatRoom == null){
+                            Toast.makeText(MainActivity.this, R.string.text_error, Toast.LENGTH_LONG).show();
+                        }
                         Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(ChatConst.COLUMN_CHAT_ROOMS, chatRoom.getId());
                         startActivity(intent);
                         break;
                 }

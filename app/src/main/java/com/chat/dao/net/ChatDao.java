@@ -204,7 +204,7 @@ public class ChatDao extends ObjectDao {
 
                         List<String> result = new ArrayList<>();
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            String chatroomId = snapshot.getValue(String.class);
+                            String chatroomId = snapshot.getKey();
                             if (chatroomId != null && !chatroomId.equals("")) {
                                 result.add(chatroomId);
                             }
@@ -227,7 +227,8 @@ public class ChatDao extends ObjectDao {
         }
         tempMap = new HashMap<>();
         for (String chatroomId : chatroomIds) {
-            chatRef.orderByKey().equalTo(chatroomId).addListenerForSingleValueEvent(new ValueEventListener() {
+            chatRef.orderByKey()
+                    .equalTo(chatroomId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     // is data exist
@@ -237,7 +238,7 @@ public class ChatDao extends ObjectDao {
                     }
 
                     // put data to temp Map
-                    ChatRoom chatRoom = (ChatRoom) dataSnapshot.getValue();
+                    ChatRoom chatRoom = dataSnapshot.getChildren().iterator().next().getValue(ChatRoom.class);
                     if (chatRoom == null) {
                         chatRoom = new ChatRoom();
                     }

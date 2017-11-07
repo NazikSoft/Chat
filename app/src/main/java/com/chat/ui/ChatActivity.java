@@ -36,9 +36,6 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
         createMenu();
-
-//        Intent intent = getIntent();
-//        intent.getParcelableExtra()
     }
 
     public static void setTitle(Activity activity, String title) {

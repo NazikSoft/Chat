@@ -15,17 +15,26 @@ public class ChatRoom {
     private String id;
     private String title;
     private Message lastMessage;
-    private List<Message> messages = new ArrayList<>();
-    private HashMap<String,Integer> userReadMessageCount = new HashMap<String, Integer>();
+    private Map<String, Message> messages = new HashMap<>();
+    private HashMap<String, Integer> userReadMessageCount = new HashMap<String, Integer>();
 
     public ChatRoom() {
     }
 
-    public ChatRoom(String id, String title, Message lastMessage, List<Message> messages) {
+    public ChatRoom(String id, String title, Message lastMessage, Map<String, Message> messages) {
         this.id = id;
         this.title = title;
         this.lastMessage = lastMessage;
         this.messages = messages;
+    }
+    public ChatRoom(String id, String title, Message lastMessage, List<Message> messages) {
+        this.id = id;
+        this.title = title;
+        this.lastMessage = lastMessage;
+        this.messages = new HashMap<>();
+        for (Message message : messages) {
+            this.messages.put(message.getId(), message);
+        }
     }
 
     public String getId() {
@@ -52,13 +61,24 @@ public class ChatRoom {
         this.lastMessage = lastMessage;
     }
 
-//    @Exclude
-    public List<Message> getMessages() {
+    @Exclude
+    public List<Message> getMessagesList() {
+       return new ArrayList<>(messages.values());
+    }
+
+    @Exclude
+    public void setMessages(List<Message> messages) {
+        this.messages = new HashMap<>();
+        for (Message message : messages) {
+            this.messages.put(message.getId(), message);
+        }
+    }
+
+    public Map<String, Message> getMessages() {
         return messages;
     }
 
-//    @Exclude
-    public void setMessages(List<Message> messages) {
+    public void setMessages(Map<String, Message> messages) {
         this.messages = messages;
     }
 

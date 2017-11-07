@@ -1,5 +1,6 @@
 package com.chat.adapter;
 
+import android.content.Context;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import com.chat.R;
 import com.chat.dao.net.UserDao;
 import com.chat.entity.ChatRoom;
+import com.chat.entity.Message;
 import com.chat.entity.User;
 import com.chat.utils.ChatConst;
 
@@ -24,13 +26,15 @@ import butterknife.ButterKnife;
  */
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+    private Context context;
     private List<ChatRoom> chatRooms;
     private Handler handler;
 
 
-    public UserAdapter(List<ChatRoom> list, Handler handler) {
+    public UserAdapter(Context context, List<ChatRoom> list, Handler handler) {
         this.chatRooms = list;
         this.handler = handler;
+        this.context = context;
     }
 
     public ChatRoom getItem(int position) {
@@ -48,12 +52,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         ChatRoom chatRoom = chatRooms.get(position);
         holder.textCircle.setText(String.valueOf(chatRoom.getTitle().charAt(0)).toUpperCase());
         holder.textName.setText(chatRoom.getTitle());
-        holder.textLastMessage.setText(chatRoom.getLastMessage().getText());
+
+        Message lastMessage = chatRoom.getLastMessage();
+        if (lastMessage == null) {
+            holder.textLastMessage.setText(context.getString(R.string.text_not_message_yet));
+        } else {
+            holder.textLastMessage.setText(lastMessage.getText());
+        }
+
         int unreadMessageCount = getPostsCount(chatRoom);
-        if (unreadMessageCount != 0) {
+        if (unreadMessageCount > 0) {
             holder.textCount.setVisibility(View.VISIBLE);
             holder.textCount.setText(unreadMessageCount + "");
-        }else {
+        } else {
             holder.textCount.setVisibility(View.INVISIBLE);
             holder.textCount.setText("");
         }
@@ -63,7 +74,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         int chatMessageCount = chatRoom.getMessages().size();
         Map<String, Integer> map = chatRoom.getUserReadMessageCount();
         int userReadMessage = map.get(UserDao.getCurrentUserId());
-        return chatMessageCount-userReadMessage;
+        return chatMessageCount - userReadMessage;
     }
 
     @Override

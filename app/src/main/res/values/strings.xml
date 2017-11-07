@@ -18,4 +18,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="text_not_message_yet">Нету сообщений</string>
+    <string name="text_error">Чтото пошло не так, попробуйте снова</string>
 </resources>
