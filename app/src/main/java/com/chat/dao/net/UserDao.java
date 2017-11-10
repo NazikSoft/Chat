@@ -1,5 +1,6 @@
 package com.chat.dao.net;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,7 +56,7 @@ public class UserDao extends ObjectDao {
                 if (task.isSuccessful()) {
                     success(ChatConst.HANDLER_RESULT_OK, getCurrentUserId());
                 } else {
-                    createUserWithEmail(email,password);
+                    createUserWithEmail(email, password);
                 }
             }
         });
@@ -204,4 +206,32 @@ public class UserDao extends ObjectDao {
         });
     }
 
+    public static String getCurrentUserName() {
+        if (isUserLogged()) {
+            return FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        } else {
+            return "";
+        }
+    }
+
+    public static String getCurrentUserPhoto() {
+        if (isUserLogged()) {
+            Uri photo = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+            if (photo != null) {
+                return photo.toString();
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    public static String getCurrentUserEmail() {
+        if (isUserLogged()) {
+            return FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        } else {
+            return "";
+        }
+    }
 }

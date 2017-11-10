@@ -61,30 +61,6 @@ public class UserRecyclerAdapter extends FirebaseRecyclerAdapter<User, UserRecyc
                                     final User user) {
 //                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
         viewHolder.userName.setText(user.getName());
-//        String imageUrl = user.getImgUrl();
-//        if (imageUrl.startsWith("gs://")) {
-//            StorageReference storageReference = FirebaseStorage.getInstance()
-//                    .getReferenceFromUrl(imageUrl);
-//            storageReference.getDownloadUrl().addOnCompleteListener(
-//                    new OnCompleteListener<Uri>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<Uri> task) {
-//                            if (task.isSuccessful()) {
-//                                String downloadUrl = task.getResult().toString();
-//                                Glide.with(viewHolder.messageImageView.getContext())
-//                                        .load(downloadUrl)
-//                                        .into(viewHolder.messageImageView);
-//                            } else {
-//                                Log.w(TAG, "Getting download url was not successful.",
-//                                        task.getException());
-//                            }
-//                        }
-//                    });
-//        } else {
-//            Picasso.with(viewHolder.messageImageView.getContext())
-//                    .load(user.get)
-//                    .into(viewHolder.messageImageView);
-//        }
         if (user.getImgUrl() == null) {
             viewHolder.userImage.setImageDrawable(ContextCompat.getDrawable(context,
                     R.mipmap.ic_launcher));

@@ -13,6 +13,8 @@ public class ChatConst {
     public static final String CHAT_DATABASE_PATH = "chats";
 
     public static final String COLUMN_CHAT_ROOMS = "chatRooms";
+    public static final String COLUMN_MESSAGES = "messages";
+    public static final String COLUMN_USER_READ_MESSAGE_COUNT = "userReadMessageCount";
 
     public final static int HANDLER_RECEIVE_MSG = 10101;
     public final static int HANDLER_USERS_LIST = 10102;
@@ -34,4 +36,8 @@ public class ChatConst {
     public static final SimpleDateFormat sdf=new SimpleDateFormat("dd MMM HH:mm:ss");
 
 
+    public static final int DEFAULT_MSG_LENGTH_LIMIT = 100;
+    public static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
+    public static final String NOTIFICATION_ID = "generalNotificationChanel";
+    public static final String EXTRA_CHAT_ID = "chatRoomIdExtra";
 }

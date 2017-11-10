@@ -14,12 +14,15 @@ import android.util.Log;
 import com.chat.R;
 
 import com.chat.entity.Chat;
+import com.chat.entity.ChatRoom;
+import com.chat.entity.Message;
 import com.chat.ui.ChatActivity;
 import com.chat.utils.ChatConst;
 import com.chat.utils.ChatUtil;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -34,14 +37,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> map = remoteMessage.getData();
             String str = map.get("message");
-            Chat chat = ChatUtil.fromJson(str, Chat.class);
-            Log.i(TAG, "Message data payload: " + "\n" + chat);
+            Message message = ChatUtil.fromJson(str, Message.class);
+            String chatRoomId = map.get("chatRoomId");
+            Log.i(TAG, "Message data payload: " + "\n" + message);
             if (handler == null)
-                sendNotification(chat);
+                sendNotification(chatRoomId, message);
             else {
-                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
-                thePlayer.start();
-                handler.obtainMessage(ChatConst.HANDLER_RECEIVE_MSG, chat).sendToTarget();
+//                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
+//                thePlayer.start();
+//                handler.obtainMessage(ChatConst.HANDLER_RECEIVE_MSG, chatRoom).sendToTarget();
             }
         }
         if (remoteMessage.getNotification() != null) {
@@ -49,17 +53,27 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void sendNotification(Chat chat) {
+    private void sendNotification(String chatId, Message message) {
+        if (message == null) {
+            return;
+        }
+        String text;
+        if (message.getImageUrl() != null) {
+            text = getString(R.string.text_get_image_message);
+        } else {
+            text = message.getText();
+        }
+
         Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra("token", chat.getCompanionToken());
+        intent.putExtra(ChatConst.EXTRA_CHAT_ID, chatId);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 0);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, ChatConst.NOTIFICATION_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(chat.getCompanionName())
-                .setContentText(chat.getMessage())
+                .setContentTitle(message.getName())
+                .setContentText(text)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
@@ -73,6 +87,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static void setHandler(Handler h) {
         handler = h;
     }
-
-
 }

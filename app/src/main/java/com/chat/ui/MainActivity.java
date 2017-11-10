@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.test.mock.MockApplication;
 import android.widget.Toast;
 
 import com.chat.R;
@@ -68,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
                         List<ChatRoom> listOfChatRooms = new ArrayList<>();
                         listOfChatRooms = (List<ChatRoom>) msg.obj;
                         createAdapter(listOfChatRooms);
+                        if (listOfChatRooms.size()==0){
+                            Toast.makeText(MainActivity.this, "Список чатов пуст", Toast.LENGTH_LONG).show();
+                        }
                         break;
                     case ChatConst.HANDLER_RESULT_ERR:
                         Toast.makeText(MainActivity.this, "Connection error", Toast.LENGTH_LONG).show();
@@ -81,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(ChatConst.COLUMN_CHAT_ROOMS, chatRoom.getId());
+                        intent.putExtra(ChatConst.EXTRA_CHAT_ID, chatRoom.getId());
                         startActivity(intent);
                         break;
                 }

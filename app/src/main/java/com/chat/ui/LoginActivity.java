@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         initHandler();
         dao = new UserDao(handler);
+        FirebaseAuth.getInstance().signOut();
         if (UserDao.isUserLogged()) {
             toMain();
         }

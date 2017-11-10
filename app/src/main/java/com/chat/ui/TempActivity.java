@@ -34,7 +34,6 @@ public class TempActivity extends AppCompatActivity {
 
 
     // Firebase instance variables
-    private DatabaseReference mFirebaseDatabaseReference;
     private UserRecyclerAdapter mFirebaseAdapter;
     private LinearLayoutManager mLinearLayoutManager;
     private ChatDao chatDao;
@@ -49,10 +48,7 @@ public class TempActivity extends AppCompatActivity {
         initHandler();
         chatDao = new ChatDao(handler);
 
-        // New child entries
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
-
+        // create adapter
         SnapshotParser<User> parser = new SnapshotParser<User>() {
             @Override
             public User parseSnapshot(DataSnapshot dataSnapshot) {
@@ -60,7 +56,7 @@ public class TempActivity extends AppCompatActivity {
                 return user;
             }
         };
-        DatabaseReference userRef = mFirebaseDatabaseReference.child(ChatConst.USER_DATABASE_PATH);
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(ChatConst.USER_DATABASE_PATH);
         FirebaseRecyclerOptions<User> options =
                 new FirebaseRecyclerOptions.Builder<User>()
                         .setQuery(userRef, parser)
@@ -79,15 +75,15 @@ public class TempActivity extends AppCompatActivity {
             }
         });
 
-//        mFirebaseAdapter = new FirebaseRecyclerAdapter<User, UserViewHolder>(options) {
+//        mFirebaseAdapter = new FirebaseRecyclerAdapter<User, ChatViewHolder>(options) {
 //            @Override
-//            public UserViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+//            public ChatViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
 //                LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-//                return new UserViewHolder(inflater.inflate(R.layout.item_user, viewGroup, false));
+//                return new ChatViewHolder(inflater.inflate(R.layout.item_user, viewGroup, false));
 //            }
 //
 //            @Override
-//            protected void onBindViewHolder(final UserViewHolder viewHolder,
+//            protected void onBindViewHolder(final ChatViewHolder viewHolder,
 //                                            int position,
 //                                            User user) {
 ////                mProgressBar.setVisibility(ProgressBar.INVISIBLE);

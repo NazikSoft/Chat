@@ -48,12 +48,24 @@ public class Request {
         @Expose
         private String message;
 
+        @SerializedName("chatRoomId")
+        @Expose
+        private String chatRoomId;
+
         public String getMessage() {
             return message;
         }
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public String getChatRoomId() {
+            return chatRoomId;
+        }
+
+        public void setChatRoomId(String chatRoomId) {
+            this.chatRoomId = chatRoomId;
         }
     }
 }

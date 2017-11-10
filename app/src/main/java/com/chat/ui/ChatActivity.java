@@ -73,7 +73,8 @@ public class ChatActivity extends AppCompatActivity {
         Fragment fragment = null;
         switch (temp.getFragmentPosition()) {
             case 0:
-                fragment = ChatFragment.newInstance(getIntent(), listener);
+                String chatRoomId = getIntent().getStringExtra(ChatConst.EXTRA_CHAT_ID);
+                fragment = ChatFragment.newInstance(chatRoomId, listener);
                 break;
             case 1:
                 fragment = ImagePreviewFragment.newInstance(temp.getCompanionToken(), urlImage);
