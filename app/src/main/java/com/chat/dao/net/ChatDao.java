@@ -276,7 +276,7 @@ public class ChatDao extends ObjectDao {
 
     }
 
-    public void sendMessage(String chatRoomId, Message message) {
+    public void sendMessage(String chatRoomId, final Message message) {
         DatabaseReference messageRef = chatRef.child(chatRoomId).child(ChatConst.COLUMN_MESSAGES);
         String messageId = messageRef.push().getKey();
         message.setId(messageId);
@@ -290,7 +290,7 @@ public class ChatDao extends ObjectDao {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    success(ChatConst.HANDLER_RESULT_OK);
+                    success(ChatConst.HANDLER_RESULT_OK, message);
                 } else {
                     error(ChatConst.HANDLER_RESULT_ERR);
                 }
@@ -324,7 +324,7 @@ public class ChatDao extends ObjectDao {
                                     .getReference(UserDao.getCurrentUserId())
                                     .child(key)
                                     .child(uri.getLastPathSegment());
-                    putImageInStorage(storageReference, uri, key);
+                    putImageInStorage(storageReference, uri, databaseReference);
                 } else {
                     Log.w(ChatConst.TAG, "Unable to write message to database.", databaseError.toException());
                     error(ChatConst.HANDLER_RESULT_ERR);
@@ -333,7 +333,7 @@ public class ChatDao extends ObjectDao {
         });
     }
 
-    private void putImageInStorage(StorageReference storageReference, Uri uri, final String key) {
+    private void putImageInStorage(StorageReference storageReference, Uri uri, final DatabaseReference databaseReference) {
         storageReference.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -346,8 +346,7 @@ public class ChatDao extends ObjectDao {
                     String img = downloadUrl.toString();
 
                     // update image data in database
-                    FirebaseDatabase.getInstance().getReference()
-                            .child(key)
+                    databaseReference.child(ChatConst.COLUMN_IMAGE_URL)
                             .setValue(img).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

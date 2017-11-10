@@ -86,7 +86,6 @@ public class ChatFragment extends Fragment {
     private LinearLayoutManager mLinearLayoutManager;
     private Manager managerApi;
     private static String chatRoomId;
-    private C
     private ChatDao chatDao;
     private Handler handler;
 
@@ -296,38 +295,17 @@ public class ChatFragment extends Fragment {
             public void handleMessage(android.os.Message msg) {
                 super.handleMessage(msg);
                 switch (msg.what) {
-//                    case ChatConst.HANDLER_CHAT_LIST:
-//                        List<Chat> list = (List<Chat>) msg.obj;
-//                        if (list.size() > 0)
-//                            objectId = list.get(list.size() - 1).getObjectId();
-//                        else
-//                            objectId = null;
-//                        addChatToAdapter(list);
-//                        break;
-//                    case ChatConst.HANDLER_RESULT_COMPAMION_USER:
-//                        companionUser = (User) msg.obj;
-//                        temp.setCompanionToken(companionUser.getToken());
-//                        ChatActivity.setTitle(getActivity(), companionUser.getName());
-//                        break;
-//                    case ChatConst.HANDLER_RESULT_CURRENT_USER:
-//                        currentUser = (User) msg.obj;
-//                        break;
-//                    case ChatConst.HANDLER_RECEIVE_MSG:
-//                        Chat chat = (Chat) msg.obj;
-//                        Log.i(TAG, "readAll: " + chat);
-//                        if (companionUser.getToken().equals(chat.getCompanionToken()))
-//                            addChatToAdapter(chat);
-//                        break;
                     case ChatConst.HANDLER_IMAGE_SAVE_OK:
-                        sendFCM((Chat) msg.obj);
+//                        sendFCM((Chat) msg.obj);
                         break;
 
                     case ChatConst.HANDLER_RESULT_OK:
                         // clear edit text field
                         textMsg.setText("");
-
-                        sendFCM(chat);
-
+                        Message message = (Message) msg.obj;
+                        if (message != null) {
+                            sendFCM(message);
+                        }
                         break;
                 }
             }
@@ -391,9 +369,13 @@ public class ChatFragment extends Fragment {
 
     @Override
     public void onPause() {
-        MyFirebaseMessagingService.setHandler(null);
-        chatDao.updateReadMessageCount(chatRoomId, adapter.getItemCount());
+        // update messages read status
+        if (adapter.getItemCount() > 0) {
+            chatDao.updateReadMessageCount(chatRoomId, adapter.getItemCount());
+        }
+
         adapter.stopListening();
+        MyFirebaseMessagingService.setHandler(null);
         super.onPause();
 //        adapter = null;
     }

@@ -105,8 +105,8 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<Message, ChatRe
                                     String downloadUrl = task.getResult().toString();
                                     Picasso.with(holder.messageImg.getContext())
                                             .load(downloadUrl)
-                                            .resizeDimen(150, 250)
-                                            .centerCrop()
+//                                            .resize(150, 250)
+//                                            .centerCrop()
                                             .placeholder(R.drawable.placeholder)
                                             .into(holder.messageImg, callback);
                                 } else {
@@ -118,8 +118,8 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<Message, ChatRe
             } else {
                 Picasso.with(holder.messageImg.getContext())
                         .load(message.getImageUrl())
-                        .resizeDimen(150, 250)
-                        .centerCrop()
+//                        .resize(50, 50)
+//                        .centerCrop()
                         .placeholder(R.drawable.placeholder)
                         .into(holder.messageImg, callback);
             }

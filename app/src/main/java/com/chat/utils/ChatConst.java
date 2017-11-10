@@ -15,6 +15,8 @@ public class ChatConst {
     public static final String COLUMN_CHAT_ROOMS = "chatRooms";
     public static final String COLUMN_MESSAGES = "messages";
     public static final String COLUMN_USER_READ_MESSAGE_COUNT = "userReadMessageCount";
+    public static final String COLUMN_IMAGE_URL = "imageUrl";
+
 
     public final static int HANDLER_RECEIVE_MSG = 10101;
     public final static int HANDLER_USERS_LIST = 10102;
