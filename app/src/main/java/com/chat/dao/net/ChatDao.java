@@ -1,5 +1,6 @@
 package com.chat.dao.net;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -30,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.chat.utils.ChatConst.LOADING_IMAGE_URL;
 
@@ -54,6 +56,7 @@ public class ChatDao extends ObjectDao {
         }
         userRef = FirebaseDatabase.getInstance().getReference(ChatConst.USER_DATABASE_PATH);
         userDao = new UserDao(handler);
+        tempMap = new HashMap<>();
     }
 
     public void save(Chat chat) {
@@ -138,6 +141,61 @@ public class ChatDao extends ObjectDao {
         });
     }
 
+
+    public void getParticipantsTokens(String chatRoomId) {
+        chatRef.child(chatRoomId)
+                .child(ChatConst.COLUMN_USER_READ_MESSAGE_COUNT)
+                .orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    error(ChatConst.HANDLER_RESULT_ERR);
+                    return;
+                }
+                Map<String, Integer> temp =(HashMap<String, Integer>) dataSnapshot.getValue();
+                if (temp != null || !temp.isEmpty()) {
+                    Set<String> participantsIds = temp.keySet();
+                    participantsIds.remove(UserDao.getCurrentUserId());
+                    getTokensByUserId(participantsIds);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                error(ChatConst.HANDLER_RESULT_ERR);
+            }
+        });
+
+    }
+
+    private void getTokensByUserId(Set<String> participantsIds) {
+        tempMap.clear();
+        counter = 0;
+        for (String participantsId : participantsIds) {
+            userRef.child(participantsId)
+                   .child(ChatConst.COLUMN_TOKEN)
+                    .orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    counter++;
+                    String token = dataSnapshot.getValue(String.class);
+                    tempMap.put(token, "");
+                    if (tempMap.size() == counter) {
+                        List<String> result = new ArrayList<>(tempMap.keySet());
+                        success(ChatConst.HANDLER_TOKENS_LIST, result);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+    }
+
+
     public void updateByMap(String objectId, Map<String, Object> update) {
         chatRef.child(objectId).updateChildren(update);
     }
@@ -191,7 +249,6 @@ public class ChatDao extends ObjectDao {
                 } else {
                     error(ChatConst.HANDLER_RESULT_ERR);
                 }
-
             }
         });
 
@@ -234,7 +291,6 @@ public class ChatDao extends ObjectDao {
             success(ChatConst.HANDLER_RESULT_OK, new ArrayList<ChatRoom>());
             return;
         }
-        tempMap = new HashMap<>();
         for (String chatroomId : chatroomIds) {
             chatRef.orderByKey()
                     .equalTo(chatroomId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -276,7 +332,7 @@ public class ChatDao extends ObjectDao {
 
     }
 
-    public void sendMessage(String chatRoomId, final Message message) {
+    public void sendMessage(final String chatRoomId, final Message message) {
         DatabaseReference messageRef = chatRef.child(chatRoomId).child(ChatConst.COLUMN_MESSAGES);
         String messageId = messageRef.push().getKey();
         message.setId(messageId);
@@ -291,6 +347,7 @@ public class ChatDao extends ObjectDao {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     success(ChatConst.HANDLER_RESULT_OK, message);
+                    updateLastMessage(chatRoomId, message);
                 } else {
                     error(ChatConst.HANDLER_RESULT_ERR);
                 }
@@ -303,6 +360,7 @@ public class ChatDao extends ObjectDao {
         DatabaseReference messageRef = chatRef.child(chatRoomId).child(ChatConst.COLUMN_MESSAGES);
 
         String messageId = messageRef.push().getKey();
+        String userId = UserDao.getCurrentUserId();
         Date date = new Date();
         String name = UserDao.getCurrentUserName();
         if (name == null || name.equals("")) {
@@ -310,8 +368,10 @@ public class ChatDao extends ObjectDao {
         }
         String imageUrl = ChatConst.LOADING_IMAGE_URL;
         String photoUrl = UserDao.getCurrentUserPhoto();
+
         // create message entity
-        Message message = new Message(messageId, null, name, photoUrl, imageUrl, date);
+        final Message message = new Message(messageId, userId, null, name, photoUrl, imageUrl, date);
+
         // save message in db
         messageRef.child(messageId).setValue(message, new DatabaseReference.CompletionListener() {
             @Override
@@ -324,7 +384,7 @@ public class ChatDao extends ObjectDao {
                                     .getReference(UserDao.getCurrentUserId())
                                     .child(key)
                                     .child(uri.getLastPathSegment());
-                    putImageInStorage(storageReference, uri, databaseReference);
+                    putImageInStorage(storageReference, uri, databaseReference, message);
                 } else {
                     Log.w(ChatConst.TAG, "Unable to write message to database.", databaseError.toException());
                     error(ChatConst.HANDLER_RESULT_ERR);
@@ -333,26 +393,35 @@ public class ChatDao extends ObjectDao {
         });
     }
 
-    private void putImageInStorage(StorageReference storageReference, Uri uri, final DatabaseReference databaseReference) {
+    private void updateLastMessage(String chatRoomId, Message message) {
+        chatRef.child(chatRoomId)
+                .child(ChatConst.COLUMN_LAST_MESSAGE)
+                .setValue(message);
+    }
+
+    private void putImageInStorage(StorageReference storageReference, Uri uri, final DatabaseReference databaseReference, final Message message) {
         storageReference.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
                     Uri downloadUrl = task.getResult().getDownloadUrl();
-                    if (downloadUrl == null){
+                    if (downloadUrl == null) {
                         error(ChatConst.HANDLER_RESULT_ERR);
                         return;
                     }
                     String img = downloadUrl.toString();
+                    message.setImageUrl(img);
 
                     // update image data in database
                     databaseReference.child(ChatConst.COLUMN_IMAGE_URL)
                             .setValue(img).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()){
-                                success(ChatConst.HANDLER_IMAGE_SAVE_OK);
-                            }else {
+                            if (task.isSuccessful()) {
+                                success(ChatConst.HANDLER_IMAGE_SAVE_OK, message);
+                                String chatRoomId = databaseReference.getParent().getParent().getKey();
+                                updateLastMessage(chatRoomId, message);
+                            } else {
                                 error(ChatConst.HANDLER_RESULT_ERR);
                             }
                         }

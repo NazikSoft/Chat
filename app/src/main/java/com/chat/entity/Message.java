@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class Message {
     private String id;
+    private String userId;
     private String text;
     private String name;
     private String photoUrl;
@@ -17,8 +18,9 @@ public class Message {
     public Message() {
     }
 
-    public Message(String id, String text, String name, String photoUrl, String imageUrl, Date date) {
+    public Message(String id, String userId, String text, String name, String photoUrl, String imageUrl, Date date) {
         this.id = id;
+        this.userId = userId;
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
@@ -32,6 +34,14 @@ public class Message {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getText() {

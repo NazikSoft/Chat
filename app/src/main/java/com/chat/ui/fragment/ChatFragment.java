@@ -88,6 +88,7 @@ public class ChatFragment extends Fragment {
     private static String chatRoomId;
     private ChatDao chatDao;
     private Handler handler;
+    private Message fcmMessage;
 
 
     private User currentUser;
@@ -296,17 +297,26 @@ public class ChatFragment extends Fragment {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case ChatConst.HANDLER_IMAGE_SAVE_OK:
-//                        sendFCM((Chat) msg.obj);
+                        Message imgMessage = (Message) msg.obj;
+                        if (imgMessage != null) {
+                            fcmMessage = imgMessage;
+                            chatDao.getParticipantsTokens(chatRoomId);
+                        }
                         break;
 
                     case ChatConst.HANDLER_RESULT_OK:
                         // clear edit text field
                         textMsg.setText("");
-                        Message message = (Message) msg.obj;
-                        if (message != null) {
-                            sendFCM(message);
+                        Message textMessage = (Message) msg.obj;
+                        if (textMessage != null) {
+                            fcmMessage = textMessage;
+                            chatDao.getParticipantsTokens(chatRoomId);
                         }
                         break;
+
+                    case ChatConst.HANDLER_TOKENS_LIST:
+                        List<String> tokenList = (List<String>) msg.obj;
+                        sendFCM(fcmMessage, tokenList);
                 }
             }
         };
@@ -317,6 +327,7 @@ public class ChatFragment extends Fragment {
             // create message entity
             Message message = new Message();
             message.setDate(new Date());
+            message.setUserId(UserDao.getCurrentUserId());
             message.setText(msg);
             // send message
             chatDao.sendMessage(chatRoomId, message);
@@ -332,12 +343,16 @@ public class ChatFragment extends Fragment {
         }
     }
 
-    private void sendFCM(Message message) {
-        Request request = new Request();
-        request.setTo(companionUser.getToken());
-        request.getData().setChatRoomId(chatRoomId);
-        request.getData().setMessage(ChatUtil.toJson(message));
-        managerApi.send(request);
+    private void sendFCM(Message message, List<String> tokenList) {
+        if (tokenList != null && !tokenList.isEmpty()) {
+            for (String token : tokenList) {
+                Request request = new Request();
+                request.setTo(token);
+                request.getData().setChatRoomId(chatRoomId);
+                request.getData().setMessage(ChatUtil.toJson(message));
+                managerApi.send(request);
+            }
+        }
     }
 
     @Override

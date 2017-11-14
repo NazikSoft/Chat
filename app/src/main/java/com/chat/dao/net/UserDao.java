@@ -234,4 +234,10 @@ public class UserDao extends ObjectDao {
             return "";
         }
     }
+
+    public void updateUserToken(String refreshedToken) {
+        userRef.child(UserDao.getCurrentUserId())
+                .child(ChatConst.COLUMN_TOKEN)
+                .setValue(refreshedToken);
+    }
 }

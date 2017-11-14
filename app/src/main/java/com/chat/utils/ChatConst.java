@@ -16,7 +16,8 @@ public class ChatConst {
     public static final String COLUMN_MESSAGES = "messages";
     public static final String COLUMN_USER_READ_MESSAGE_COUNT = "userReadMessageCount";
     public static final String COLUMN_IMAGE_URL = "imageUrl";
-
+    public static final String COLUMN_LAST_MESSAGE = "lastMessage";
+    public static final String COLUMN_TOKEN = "token";
 
     public final static int HANDLER_RECEIVE_MSG = 10101;
     public final static int HANDLER_USERS_LIST = 10102;
@@ -32,6 +33,8 @@ public class ChatConst {
     public final static int ACTION_IMAGE_CAPTURE = 10119;
     public final static int HANDLER_IMAGE_SAVE_OK = 10120;
     public final static int RECYCLER_LIST_CLICKED = 10121;
+    public static final int HANDLER_TOKENS_LIST = 101222;
+
 
     public static final String DATE_PARSE_REG_EXP = "%1$te %1$tm %1$tY";
     public static final String TIME_PARSE_REG_EXP = "%1$tH:%1$tM";
