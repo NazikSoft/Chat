@@ -27,7 +27,7 @@ public class ChatRoomAdapter extends FirebaseRecyclerAdapter<ChatRoom, ChatRoomA
     private Context context;
     private OnChatClickListener listener;
 
-    public interface OnChatClickListener{
+    public interface OnChatClickListener {
         void onClick(ChatRoom chatRoom);
     }
 
@@ -47,7 +47,7 @@ public class ChatRoomAdapter extends FirebaseRecyclerAdapter<ChatRoom, ChatRoomA
     @Override
     protected void onBindViewHolder(ViewHolder holder, int position, final ChatRoom chatRoom) {
         if (chatRoom.getId() == null) {
-           return;
+            return;
         }
         holder.textCircle.setText(String.valueOf(chatRoom.getTitle().charAt(0)).toUpperCase());
         holder.textName.setText(chatRoom.getTitle());
@@ -56,7 +56,11 @@ public class ChatRoomAdapter extends FirebaseRecyclerAdapter<ChatRoom, ChatRoomA
         if (lastMessage == null) {
             holder.textLastMessage.setText(context.getString(R.string.text_not_message_yet));
         } else {
-            holder.textLastMessage.setText(lastMessage.getText());
+            if (lastMessage.getText() != null && !lastMessage.getText().equals("")) {
+                holder.textLastMessage.setText(lastMessage.getText());
+            } else {
+                holder.textLastMessage.setText(context.getString(R.string.text_get_image_message));
+            }
         }
 
         int unreadMessageCount = getPostsCount(chatRoom);
@@ -82,7 +86,7 @@ public class ChatRoomAdapter extends FirebaseRecyclerAdapter<ChatRoom, ChatRoomA
         return chatMessageCount - userReadMessage;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         private View itemView;
         @BindView(R.id.textCircle)
         TextView textCircle;

@@ -77,18 +77,11 @@ public class ChatFragment extends Fragment {
     private static Uri imageUri;
     private int heightDiff;
     private int indexPermission;
-//    private TempConfig temp;
-//    private OnClickListener onClickListener;
 
     public static ChatFragment newInstance(String chatRoomId) {
         ChatFragment frg = new ChatFragment();
         ChatFragment.chatRoomId = chatRoomId;
-//        frg.onClickListener = onClickListener;
         return frg;
-    }
-
-    public interface OnClickListener {
-        void onClick(String path);
     }
 
     @Nullable
@@ -96,7 +89,6 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         ButterKnife.bind(this, view);
-//        temp = ((ChatApp) getActivity().getApplication()).getTemp();
         managerApi = new Manager(handler);
 
         if (chatRoomId == null) {
@@ -162,6 +154,7 @@ public class ChatFragment extends Fragment {
             }
         });
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
+//        mLinearLayoutManager.setStackFromEnd(true);
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {

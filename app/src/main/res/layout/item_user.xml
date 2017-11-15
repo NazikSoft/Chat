@@ -41,14 +41,12 @@
                         android:id="@+id/textName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:textSize="20dp" />
 
                     <TextView
                         android:id="@+id/textLastMessage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="TextView" />
                 </LinearLayout>
 

@@ -2,9 +2,11 @@ package com.chat.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.chat.R;
@@ -12,7 +14,10 @@ import com.chat.adapter.ChatRoomAdapter;
 import com.chat.dao.net.UserDao;
 //import com.chat.chatDao.local.ChatRealm;
 import com.chat.entity.ChatRoom;
+import com.chat.ui.fragment.ChatFragment;
+import com.chat.ui.fragment.UserChatRoomsFragment;
 import com.chat.utils.ChatConst;
+import com.chat.utils.ChatUtil;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,167 +25,41 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private ChatRoomAdapter adapter;
+    @BindView(R.id.containerFragment)
+    FrameLayout container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_user);
+        setContentView(R.layout.main_activity);
+        ButterKnife.bind(this);
 
+        // if user not logged start LoginActivity
         String userId = UserDao.getCurrentUserId();
         if (userId.equals("")) {
             startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
-        initAdapter();
-    }
 
-    private void initAdapter() {
-        // create parser
-        SnapshotParser<ChatRoom> parser = new SnapshotParser<ChatRoom>() {
-            @Override
-            public ChatRoom parseSnapshot(DataSnapshot dataSnapshot) {
-                return dataSnapshot.getValue(ChatRoom.class);
-            }
-        };
-        // get database reference for ChatRooms
-        DatabaseReference chatDatabase = FirebaseDatabase.getInstance().getReference()
-                .child(ChatConst.CHAT_DATABASE_PATH);
-
-        // get Query of user ChatRoom
-        Query chatRoomIdQuery = FirebaseDatabase.getInstance().getReference()
-                .child(ChatConst.USER_DATABASE_PATH)
-                .child(UserDao.getCurrentUserId())
-                .child(ChatConst.COLUMN_CHAT_ROOMS)
-                .orderByKey();
-
-        // create options
-        FirebaseRecyclerOptions<ChatRoom> options =
-                new FirebaseRecyclerOptions.Builder<ChatRoom>()
-                        .setIndexedQuery(chatRoomIdQuery, chatDatabase, parser)
-                        .build();
-
-        // init OnClickListener
-        ChatRoomAdapter.OnChatClickListener listener = new ChatRoomAdapter.OnChatClickListener() {
-            @Override
-            public void onClick(ChatRoom chatRoom) {
-                if (chatRoom == null) {
-                    Toast.makeText(MainActivity.this, R.string.text_error, Toast.LENGTH_LONG).show();
-                    return;
-                }
-                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(ChatConst.EXTRA_CHAT_ID, chatRoom.getId());
-                startActivity(intent);
-            }
-        };
-
-        // init adapter
-        adapter = new ChatRoomAdapter(this, options, listener);
-
-        final LinearLayoutManager manager = new LinearLayoutManager(this);
-//        mLinearLayoutManager.setStackFromEnd(true);
-
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                int messageCount = adapter.getItemCount();
-                int lastVisiblePosition = manager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded or the
-                // user is at the bottom of the list, scroll to the bottom
-                // of the list to show the newly added message.
-                if (lastVisiblePosition == -1 ||
-                        (positionStart >= (messageCount - 1) &&
-                                lastVisiblePosition == (positionStart - 1))) {
-                    recyclerView.scrollToPosition(positionStart);
-                }
-            }
-        });
-
-        recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapter);
-    }
-
-
-//    private void initHandler() {
-//        handler = new Handler() {
-//            @Override
-//            public void handleMessage(Message msg) {
-//                super.handleMessage(msg);
-//                switch (msg.what) {
-//                    case ChatConst.HANDLER_RESULT_OK:
-//                        List<ChatRoom> listOfChatRooms = new ArrayList<>();
-//                        listOfChatRooms = (List<ChatRoom>) msg.obj;
-//
-//                        if (listOfChatRooms.size() == 0) {
-//                            Toast.makeText(MainActivity.this, "Список чатов пуст", Toast.LENGTH_LONG).show();
-//                        }
-//                        break;
-//                    case ChatConst.HANDLER_RESULT_ERR:
-//                        Toast.makeText(MainActivity.this, "Connection error", Toast.LENGTH_LONG).show();
-//                        break;
-//
-//                    // click recycler view list item
-//                    case ChatConst.HANDLER_CLICK_RECYCLER_ITEM:
-//                        ChatRoom chatRoom = (ChatRoom) msg.obj;
-//                        if (chatRoom == null) {
-//                            Toast.makeText(MainActivity.this, R.string.text_error, Toast.LENGTH_LONG).show();
-//                        }
-//                        Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-//                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                        intent.putExtra(ChatConst.EXTRA_CHAT_ID, chatRoom.getId());
-//                        startActivity(intent);
-//                        break;
-//                }
-//            }
-//        };
-//    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        adapter.startListening();
+        Intent intent = getIntent();
+        if (intent.hasExtra(ChatConst.EXTRA_CHAT_ID)){
+            Fragment fragment = ChatFragment.newInstance(intent.getStringExtra(ChatConst.EXTRA_CHAT_ID));
+            ChatUtil.changeFragmentTo(this, fragment, "chatFragment");
+        }else {
+            ChatUtil.changeFragmentTo(this, new UserChatRoomsFragment(), "main");
+        }
     }
 
     @Override
-    protected void onPause() {
-        adapter.stopListening();
-        super.onPause();
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (getFragmentManager().getBackStackEntryCount()<1){
+            finish();
+        }
     }
-
-    //    private Handler handler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//            switch (msg.what) {
-//                case ChatConst.HANDLER_USERS_LIST:
-//                    List<User> list = (List<User>) msg.obj;
-//                    createAdapter(list);
-//                    break;
-//                case ChatConst.HANDLER_CLICK_RECYCLER_ITEM:
-//                    Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    intent.putExtra("token", (String) msg.obj);
-//                    startActivity(intent);
-//                    break;
-//                case ChatConst.HANDLER_CHAT_LIST:
-//                    List<Chat> list1 = (List<Chat>) msg.obj;
-//                    if (list1.size() > 0){
-//                        adapter.getPostsCount(list1);
-//                        objectId = list1.get(list1.size() - 1).getObjectId();
-//                    }
-//                    break;
-//            }
-//        }
-//    };
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        chatDao.readAll();
-//        chatDao.readAllByObjectId(objectId);
-//    }
 }

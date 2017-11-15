@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -13,7 +14,7 @@ import android.util.Log;
 import com.chat.R;
 
 import com.chat.entity.Message;
-import com.chat.ui.ChatActivity;
+import com.chat.ui.MainActivity;
 import com.chat.utils.ChatConst;
 import com.chat.utils.ChatUtil;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -39,8 +40,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (handler == null)
                 sendNotification(chatRoomId, message);
             else {
-//                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
-//                thePlayer.start();
+                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
+                thePlayer.start();
 //                handler.obtainMessage(ChatConst.HANDLER_RECEIVE_MSG, chatRoom).sendToTarget();
             }
         }
@@ -60,7 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             text = message.getText();
         }
 
-        Intent intent = new Intent(this, ChatActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(ChatConst.EXTRA_CHAT_ID, chatId);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
