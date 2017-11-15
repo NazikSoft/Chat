@@ -2,20 +2,13 @@ package com.chat.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.test.mock.MockApplication;
 import android.widget.Toast;
 
 import com.chat.R;
-import com.chat.adapter.ChatRecyclerAdapter;
-import com.chat.adapter.UserAdapter;
-import com.chat.adapter.UserAdapter2;
-import com.chat.dao.net.ChatDao;
+import com.chat.adapter.ChatRoomAdapter;
 import com.chat.dao.net.UserDao;
 //import com.chat.chatDao.local.ChatRealm;
 import com.chat.entity.ChatRoom;
@@ -27,14 +20,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private UserAdapter2 adapter;
+    private ChatRoomAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
         // init OnClickListener
-        UserAdapter2.OnChatClickListener listener = new UserAdapter2.OnChatClickListener() {
+        ChatRoomAdapter.OnChatClickListener listener = new ChatRoomAdapter.OnChatClickListener() {
             @Override
             public void onClick(ChatRoom chatRoom) {
                 if (chatRoom == null) {
@@ -90,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // init adapter
-        adapter = new UserAdapter2(this, options, listener);
+        adapter = new ChatRoomAdapter(this, options, listener);
 
         final LinearLayoutManager manager = new LinearLayoutManager(this);
 //        mLinearLayoutManager.setStackFromEnd(true);

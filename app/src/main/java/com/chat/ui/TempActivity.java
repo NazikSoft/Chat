@@ -10,7 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.chat.R;
-import com.chat.adapter.UserRecyclerAdapter;
+import com.chat.adapter.UserAdapter;
 import com.chat.dao.net.ChatDao;
 import com.chat.dao.net.UserDao;
 import com.chat.entity.ChatRoom;
@@ -34,7 +34,7 @@ public class TempActivity extends AppCompatActivity {
 
 
     // Firebase instance variables
-    private UserRecyclerAdapter mFirebaseAdapter;
+    private UserAdapter mFirebaseAdapter;
     private LinearLayoutManager mLinearLayoutManager;
     private ChatDao chatDao;
     private Handler handler;
@@ -61,7 +61,7 @@ public class TempActivity extends AppCompatActivity {
                 new FirebaseRecyclerOptions.Builder<User>()
                         .setQuery(userRef, parser)
                         .build();
-        mFirebaseAdapter = new UserRecyclerAdapter(this, options, new UserRecyclerAdapter.OnUserClickListener() {
+        mFirebaseAdapter = new UserAdapter(this, options, new UserAdapter.OnUserClickListener() {
             @Override
             public void oClick(User user) {
                 ChatRoom chatRoom = new ChatRoom();

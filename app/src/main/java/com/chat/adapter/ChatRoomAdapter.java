@@ -1,25 +1,19 @@
 package com.chat.adapter;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chat.R;
 import com.chat.dao.net.UserDao;
-import com.chat.entity.Chat;
 import com.chat.entity.ChatRoom;
 import com.chat.entity.Message;
-import com.chat.entity.User;
-import com.chat.utils.ChatConst;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -29,7 +23,7 @@ import butterknife.ButterKnife;
  * Created by m on 15.09.2017.
  */
 
-public class UserAdapter2 extends FirebaseRecyclerAdapter<ChatRoom, UserAdapter2.ViewHolder> {
+public class ChatRoomAdapter extends FirebaseRecyclerAdapter<ChatRoom, ChatRoomAdapter.ViewHolder> {
     private Context context;
     private OnChatClickListener listener;
 
@@ -38,7 +32,7 @@ public class UserAdapter2 extends FirebaseRecyclerAdapter<ChatRoom, UserAdapter2
     }
 
 
-    public UserAdapter2(Context context, FirebaseRecyclerOptions<ChatRoom> options, OnChatClickListener listener) {
+    public ChatRoomAdapter(Context context, FirebaseRecyclerOptions<ChatRoom> options, OnChatClickListener listener) {
         super(options);
         this.listener = listener;
         this.context = context;
@@ -47,7 +41,7 @@ public class UserAdapter2 extends FirebaseRecyclerAdapter<ChatRoom, UserAdapter2
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
-        return new UserAdapter2.ViewHolder(view);
+        return new ChatRoomAdapter.ViewHolder(view);
     }
 
     @Override

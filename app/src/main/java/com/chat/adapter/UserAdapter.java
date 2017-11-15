@@ -1,109 +1,84 @@
 package com.chat.adapter;
 
 import android.content.Context;
-import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chat.R;
-import com.chat.dao.net.UserDao;
-import com.chat.entity.ChatRoom;
-import com.chat.entity.Message;
 import com.chat.entity.User;
-import com.chat.utils.ChatConst;
-
-import java.util.List;
-import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.squareup.picasso.Picasso;
 
 /**
- * Created by m on 15.09.2017.
+ * Created by nazar on 01.11.17.
  */
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+public class UserAdapter extends FirebaseRecyclerAdapter<User, UserAdapter.UserViewHolder> {
+
     private Context context;
-    private List<ChatRoom> chatRooms;
-    private Handler handler;
+    private OnUserClickListener listener;
 
+    public interface OnUserClickListener{
+        void oClick(User user);
+    }
 
-    public UserAdapter(Context context, List<ChatRoom> list, Handler handler) {
-        this.chatRooms = list;
-        this.handler = handler;
+    /**
+     * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
+     * {@link FirebaseRecyclerOptions} for configuration options.
+     *
+     * @param options
+     */
+    public UserAdapter(Context context, FirebaseRecyclerOptions<User> options, OnUserClickListener listener) {
+        super(options);
         this.context = context;
+        this.listener = listener;
     }
 
-    public ChatRoom getItem(int position) {
-        return chatRooms.get(position);
+
+    @Override
+    public UserAdapter.UserViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
+        return new UserAdapter.UserViewHolder(inflater.inflate(R.layout.item_user_raw, viewGroup, false));
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        ChatRoom chatRoom = chatRooms.get(position);
-        holder.textCircle.setText(String.valueOf(chatRoom.getTitle().charAt(0)).toUpperCase());
-        holder.textName.setText(chatRoom.getTitle());
-
-        Message lastMessage = chatRoom.getLastMessage();
-        if (lastMessage == null) {
-            holder.textLastMessage.setText(context.getString(R.string.text_not_message_yet));
+    protected void onBindViewHolder(final UserAdapter.UserViewHolder viewHolder,
+                                    int position,
+                                    final User user) {
+//                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+        viewHolder.userName.setText(user.getName());
+        if (user.getImgUrl() == null) {
+            viewHolder.userImage.setImageDrawable(ContextCompat.getDrawable(context,
+                    R.mipmap.ic_launcher));
         } else {
-            holder.textLastMessage.setText(lastMessage.getText());
+            Picasso.with(context)
+                    .load(user.getImgUrl())
+                    .into(viewHolder.userImage);
         }
-
-        int unreadMessageCount = getPostsCount(chatRoom);
-        if (unreadMessageCount > 0) {
-            holder.textCount.setVisibility(View.VISIBLE);
-            holder.textCount.setText(unreadMessageCount + "");
-        } else {
-            holder.textCount.setVisibility(View.INVISIBLE);
-            holder.textCount.setText("");
-        }
+        viewHolder.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.oClick(user);
+            }
+        });
     }
 
-    public int getPostsCount(ChatRoom chatRoom) {
-        int chatMessageCount = chatRoom.getMessages().size();
-        Map<String, Integer> map = chatRoom.getUserReadMessageCount();
-        int userReadMessage = map.get(UserDao.getCurrentUserId());
-        return chatMessageCount - userReadMessage;
-    }
+    public static class UserViewHolder extends RecyclerView.ViewHolder {
+        View root;
+        TextView userName;
+        ImageView userImage;
 
-    @Override
-    public int getItemCount() {
-        return chatRooms.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private View itemView;
-        @BindView(R.id.textCircle)
-        TextView textCircle;
-        @BindView(R.id.textName)
-        TextView textName;
-        @BindView(R.id.textLastMessage)
-        TextView textLastMessage;
-        @BindView(R.id.textCount)
-        TextView textCount;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            this.itemView = itemView;
-            ButterKnife.bind(this, itemView);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            ChatRoom chatRoom = getItem(getAdapterPosition());
-            handler.obtainMessage(ChatConst.HANDLER_CLICK_RECYCLER_ITEM, chatRoom).sendToTarget();
+        public UserViewHolder(View v) {
+            super(v);
+            root = v;
+            userName = (TextView) v.findViewById(R.id.textName);
+            userImage = (ImageView) v.findViewById(R.id.userImg);
         }
     }
 }

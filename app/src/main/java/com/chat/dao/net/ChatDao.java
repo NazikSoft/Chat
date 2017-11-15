@@ -1,11 +1,13 @@
 package com.chat.dao.net;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.chat.R;
 import com.chat.dao.ObjectDao;
 import com.chat.entity.Chat;
 import com.chat.entity.ChatRoom;
@@ -355,7 +357,7 @@ public class ChatDao extends ObjectDao {
         });
     }
 
-    public void uploadImage(String chatRoomId, final Uri uri) {
+    public void uploadImage(Context context, String chatRoomId, final Uri uri) {
         Log.d(ChatConst.TAG, "Uri: " + uri.toString());
         DatabaseReference messageRef = chatRef.child(chatRoomId).child(ChatConst.COLUMN_MESSAGES);
 
@@ -366,7 +368,7 @@ public class ChatDao extends ObjectDao {
         if (name == null || name.equals("")) {
             name = UserDao.getCurrentUserEmail();
         }
-        String imageUrl = ChatConst.LOADING_IMAGE_URL;
+        String imageUrl = context.getDrawable(R.drawable.placeholder).toString();
         String photoUrl = UserDao.getCurrentUserPhoto();
 
         // create message entity

@@ -32,7 +32,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by nazar on 01.11.17.
  */
 
-public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<Message, ChatRecyclerAdapter.ChatViewHolder> {
+public class MessageAdapter extends FirebaseRecyclerAdapter<Message, MessageAdapter.ChatViewHolder> {
 
     private Context context;
     private OnImgMessageClickListener listener;
@@ -47,7 +47,7 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<Message, ChatRe
      *
      * @param options
      */
-    public ChatRecyclerAdapter(Context context, FirebaseRecyclerOptions<Message> options, OnImgMessageClickListener listener) {
+    public MessageAdapter(Context context, FirebaseRecyclerOptions<Message> options, OnImgMessageClickListener listener) {
         super(options);
         this.context = context;
         this.listener = listener;
@@ -57,7 +57,7 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<Message, ChatRe
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message, parent, false);
-        return new ChatRecyclerAdapter.ChatViewHolder(view);
+        return new MessageAdapter.ChatViewHolder(view);
     }
 
     @Override

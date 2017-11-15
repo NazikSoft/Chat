@@ -3,7 +3,6 @@ package com.chat.ui.fragment;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,59 +10,42 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.chat.ChatApp;
 import com.chat.R;
-import com.chat.adapter.ChatAdapter;
-import com.chat.adapter.ChatRecyclerAdapter;
-import com.chat.adapter.UserRecyclerAdapter;
+import com.chat.adapter.MessageAdapter;
 import com.chat.api.Manager;
 import com.chat.dao.net.ChatDao;
-import com.chat.dao.net.FileUploadDao;
 import com.chat.dao.net.UserDao;
-import com.chat.entity.Chat;
-import com.chat.entity.ChatRoom;
 import com.chat.entity.Message;
 import com.chat.entity.Request;
 import com.chat.entity.TempConfig;
 import com.chat.entity.User;
 import com.chat.fcm.MyFirebaseMessagingService;
-import com.chat.ui.ChatActivity;
 import com.chat.utils.ChatConst;
 import com.chat.utils.ChatUtil;
 import com.chat.utils.PermissionUtil;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,7 +53,6 @@ import butterknife.OnClick;
 
 
 public class ChatFragment extends Fragment {
-    private static final String TAG = ChatConst.TAG;
     @BindView(R.id.textMsg)
     EditText textMsg;
     @BindView(R.id.recycler_view_chat)
@@ -81,8 +62,7 @@ public class ChatFragment extends Fragment {
     @BindView(R.id.sendButton)
     Button send;
 
-    //    private ChatAdapter adapter;
-    private ChatRecyclerAdapter adapter;
+    private MessageAdapter adapter;
     private LinearLayoutManager mLinearLayoutManager;
     private Manager managerApi;
     private static String chatRoomId;
@@ -90,14 +70,9 @@ public class ChatFragment extends Fragment {
     private Handler handler;
     private Message fcmMessage;
 
-
-    private User currentUser;
-    private User companionUser;
     private static Uri imageUri;
-    private String objectId;
     private int heightDiff;
     private int indexPermission;
-    private String tokenCompanion;
     private TempConfig temp;
     private OnClickListener onClickListener;
 
@@ -121,9 +96,6 @@ public class ChatFragment extends Fragment {
         managerApi = new Manager(handler);
 
         if (chatRoomId == null) {
-//            tokenCompanion = intent.getStringExtra("token");
-//            Log.i(TAG, "click user: " + tokenCompanion);
-//            managerApi.getUserDao().findUserAll(tokenCompanion);
             chatRoomId = "";
             Toast.makeText(getActivity(), R.string.text_chat_load_error, Toast.LENGTH_LONG).show();
         }
@@ -178,7 +150,7 @@ public class ChatFragment extends Fragment {
                         .setQuery(messageReference, parser)
                         .build();
         // init adapter
-        adapter = new ChatRecyclerAdapter(getActivity(), options, new ChatRecyclerAdapter.OnImgMessageClickListener() {
+        adapter = new MessageAdapter(getActivity(), options, new MessageAdapter.OnImgMessageClickListener() {
 
             @Override
             public void oClick(String path) {
@@ -270,8 +242,6 @@ public class ChatFragment extends Fragment {
         if (resultCode != Activity.RESULT_OK) {
             return;
         }
-//        String path = null;
-
         if (requestCode == ChatConst.ACTION_SELECT_IMAGE) {
             imageUri = data.getData();
             prepareSendImg(imageUri);
@@ -339,7 +309,7 @@ public class ChatFragment extends Fragment {
 //            new FileUploadDao(handler).saveFile(chat);
 
             // upload img
-            chatDao.uploadImage(chatRoomId, uri);
+            chatDao.uploadImage(getActivity(), chatRoomId, uri);
         }
     }
 
