@@ -31,14 +31,14 @@ public class ImagePreviewFragment extends Fragment {
     private View view;
     private boolean isDelete;
     private ImageAdapter.OnClickListener listener;
-    private String compToken;
+    private String participantID;
     private ChatDao dao;
     private String objectId;
 
     public static ImagePreviewFragment newInstance(String compToken, String url) {
         ImagePreviewFragment frg = new ImagePreviewFragment();
         frg.url = url;
-        frg.compToken = compToken;
+        frg.participantID = compToken;
         return frg;
     }
 
@@ -49,7 +49,7 @@ public class ImagePreviewFragment extends Fragment {
 //        viewPager = (ViewPager) view.findViewById(R.id.pagePreview);
 //        viewPager.setBackgroundColor(getResources().getColor(R.color.navigationBarColor));
 //        dao = new ChatDao(handler);
-//        dao.readAllByToken(compToken, objectId);
+//        dao.readAllByToken(participantID, objectId);
         return view;
     }
 
@@ -62,14 +62,14 @@ public class ImagePreviewFragment extends Fragment {
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//            switch (msg.what) {
-//                case ChatConst.HANDLER_CHAT_LIST:
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case ChatConst.HANDLER_CHAT_LIST:
 //                    List<Chat> list = (List<Chat>) msg.obj;
 //                    objectId = list.get(list.size() - 1).getObjectId();
 //                    createAdapter(getListPath(list));
-//                    break;
-//            }
+                    break;
+            }
         }
     };
 
@@ -88,15 +88,15 @@ public class ImagePreviewFragment extends Fragment {
 //        return listPath;
 //    }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//
-//    }
-//
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//
-//    }
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
 }

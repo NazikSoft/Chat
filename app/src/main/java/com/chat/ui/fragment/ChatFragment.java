@@ -1,6 +1,7 @@
 package com.chat.ui.fragment;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,8 +20,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -43,6 +46,7 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.squareup.picasso.Picasso;
 
 import java.util.Date;
 import java.util.List;
@@ -73,13 +77,13 @@ public class ChatFragment extends Fragment {
     private static Uri imageUri;
     private int heightDiff;
     private int indexPermission;
-    private TempConfig temp;
-    private OnClickListener onClickListener;
+//    private TempConfig temp;
+//    private OnClickListener onClickListener;
 
-    public static ChatFragment newInstance(String chatRoomId, OnClickListener onClickListener) {
+    public static ChatFragment newInstance(String chatRoomId) {
         ChatFragment frg = new ChatFragment();
         ChatFragment.chatRoomId = chatRoomId;
-        frg.onClickListener = onClickListener;
+//        frg.onClickListener = onClickListener;
         return frg;
     }
 
@@ -92,7 +96,7 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         ButterKnife.bind(this, view);
-        temp = ((ChatApp) getActivity().getApplication()).getTemp();
+//        temp = ((ChatApp) getActivity().getApplication()).getTemp();
         managerApi = new Manager(handler);
 
         if (chatRoomId == null) {
@@ -154,14 +158,10 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void oClick(String path) {
-                temp.setFragmentPosition(1);
-                onClickListener.onClick(path);
+                showImgPreview(path);
             }
         });
-
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
-//        mLinearLayoutManager.setStackFromEnd(true);
-
         adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -178,10 +178,21 @@ public class ChatFragment extends Fragment {
                 }
             }
         });
-
         recyclerView.setLayoutManager(mLinearLayoutManager);
         recyclerView.setAdapter(adapter);
+    }
 
+    private void showImgPreview(String path) {
+        Dialog settingsDialog = new Dialog(getActivity());
+        settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        View view = getLayoutInflater().inflate(R.layout.image_preview, null);
+        ImageView imageView = (ImageView) view.findViewById(R.id.image);
+        Picasso.with(getActivity())
+                .load(path)
+                .placeholder(R.drawable.placeholder)
+                .into(imageView);
+        settingsDialog.setContentView(view);
+        settingsDialog.show();
     }
 
     private void keyboardSensor() {
@@ -306,7 +317,6 @@ public class ChatFragment extends Fragment {
 
     private void prepareSendImg(Uri uri) {
         if (uri != null) {
-//            new FileUploadDao(handler).saveFile(chat);
 
             // upload img
             chatDao.uploadImage(getActivity(), chatRoomId, uri);
@@ -341,7 +351,6 @@ public class ChatFragment extends Fragment {
     }
 
     private void startAction() {
-
         switch (indexPermission) {
             case 0:
                 openGallery();
@@ -362,7 +371,6 @@ public class ChatFragment extends Fragment {
         adapter.stopListening();
         MyFirebaseMessagingService.setHandler(null);
         super.onPause();
-//        adapter = null;
     }
 
     @Override
@@ -370,6 +378,5 @@ public class ChatFragment extends Fragment {
         super.onResume();
         adapter.startListening();
         MyFirebaseMessagingService.setHandler(handler);
-//        managerApi.getChatDao().readAllByToken(tokenCompanion, objectId);
     }
 }

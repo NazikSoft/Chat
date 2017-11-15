@@ -28,7 +28,7 @@ public class ChatActivity extends AppCompatActivity {
     TextView textTitle;
     private static final String TAG = ChatConst.TAG;
     private String urlImage;
-    private TempConfig temp;
+//    private TempConfig temp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
         createMenu();
+        toFragment();
     }
 
     public static void setTitle(Activity activity, String title) {
@@ -70,41 +71,44 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void toFragment() {
-        Fragment fragment = null;
-        switch (temp.getFragmentPosition()) {
-            case 0:
-                String chatRoomId = getIntent().getStringExtra(ChatConst.EXTRA_CHAT_ID);
-                fragment = ChatFragment.newInstance(chatRoomId, listener);
-                break;
-            case 1:
-                fragment = ImagePreviewFragment.newInstance(temp.getCompanionToken(), urlImage);
-                break;
-        }
-        ChatUtil.changeFragmentTo(this, fragment, "main");
-    }
+        String chatRoomId = getIntent().getStringExtra(ChatConst.EXTRA_CHAT_ID);
+        Fragment fragment = ChatFragment.newInstance(chatRoomId);
+        ChatUtil.changeFragmentTo(this,fragment,"main");
+//        Fragment fragment = null;
+//        switch (temp.getFragmentPosition()) {
+//            case 0:
+//                String chatRoomId = getIntent().getStringExtra(ChatConst.EXTRA_CHAT_ID);
+//                fragment = ChatFragment.newInstance(chatRoomId, listener);
+//                break;
+//            case 1:
+//                fragment = ImagePreviewFragment.newInstance(temp.getCompanionToken(), urlImage);
+//                break;
+//        }
+//        ChatUtil.changeFragmentTo(this, fragment, "main");
+}
 
-    private ChatFragment.OnClickListener listener = new ChatFragment.OnClickListener() {
-        @Override
-        public void onClick(String url) {
-            urlImage = url;
-            toFragment();
-        }
-    };
+//    private ChatFragment.OnClickListener listener = new ChatFragment.OnClickListener() {
+//        @Override
+//        public void onClick(String url) {
+//            urlImage = url;
+//            toFragment();
+//        }
+//    };
 
-    @Override
-    public void onBackPressed() {
-        if (temp.getFragmentPosition() > 0) {
-            temp.setFragmentPosition(temp.getFragmentPosition() - 1);
-            toFragment();
-        } else {
-            finish();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        temp = ((ChatApp) getApplication()).getTemp();
-        toFragment();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        if (temp.getFragmentPosition() > 0) {
+//            temp.setFragmentPosition(temp.getFragmentPosition() - 1);
+//            toFragment();
+//        } else {
+//            finish();
+//        }
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        temp = ((ChatApp) getApplication()).getTemp();
+//        toFragment();
+//    }
 }
