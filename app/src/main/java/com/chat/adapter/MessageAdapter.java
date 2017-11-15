@@ -1,9 +1,11 @@
 package com.chat.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chat.R;
+import com.chat.dao.net.UserDao;
 import com.chat.entity.Message;
 import com.chat.utils.ChatConst;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -141,6 +144,19 @@ public class MessageAdapter extends FirebaseRecyclerAdapter<Message, MessageAdap
                     .load(message.getPhotoUrl())
                     .into(holder.accountImg);
         }
+
+        // setup card view
+         CardView cardView = holder.cardView;
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) cardView.getLayoutParams();
+        // is this current user's message?
+         if (UserDao.getCurrentUserId().equals(message.getUserId())){
+            cardView.setCardBackgroundColor(context.getResources().getColor(R.color.green));
+                params.setMargins(300, 10, 10, 10);
+        }else {
+             cardView.setCardBackgroundColor(context.getResources().getColor(R.color.yellow));
+             params.setMargins(10, 10, 300, 10);
+         }
+        cardView.requestLayout();
     }
 
 
@@ -155,6 +171,8 @@ public class MessageAdapter extends FirebaseRecyclerAdapter<Message, MessageAdap
         ImageView messageImg;
         @BindView(R.id.messengerImageView)
         CircleImageView accountImg;
+        @BindView(R.id.message_cardview)
+        CardView cardView;
 
         public ChatViewHolder(View v) {
             super(v);

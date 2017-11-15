@@ -10,6 +10,5 @@
         android:id="@+id/recycler_view_user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/cardview_dark_background" />
+        android:layout_alignParentTop="true" />
 </RelativeLayout>

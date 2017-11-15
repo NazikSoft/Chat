@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -13,8 +12,6 @@ import android.util.Log;
 
 import com.chat.R;
 
-import com.chat.entity.Chat;
-import com.chat.entity.ChatRoom;
 import com.chat.entity.Message;
 import com.chat.ui.ChatActivity;
 import com.chat.utils.ChatConst;
@@ -22,7 +19,6 @@ import com.chat.utils.ChatUtil;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
