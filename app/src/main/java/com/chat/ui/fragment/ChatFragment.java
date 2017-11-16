@@ -1,7 +1,6 @@
 package com.chat.ui.fragment;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,14 +19,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.chat.ChatApp;
 import com.chat.R;
 import com.chat.adapter.MessageAdapter;
 import com.chat.api.Manager;
@@ -35,8 +31,6 @@ import com.chat.dao.net.ChatDao;
 import com.chat.dao.net.UserDao;
 import com.chat.entity.Message;
 import com.chat.entity.Request;
-import com.chat.entity.TempConfig;
-import com.chat.entity.User;
 import com.chat.fcm.MyFirebaseMessagingService;
 import com.chat.utils.ChatConst;
 import com.chat.utils.ChatUtil;
@@ -46,7 +40,6 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.picasso.Picasso;
 import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.Date;

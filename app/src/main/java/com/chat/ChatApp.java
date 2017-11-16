@@ -2,7 +2,6 @@ package com.chat;
 
 import android.app.Application;
 
-import com.chat.entity.TempConfig;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -11,7 +10,6 @@ import com.google.firebase.database.FirebaseDatabase;
  */
 
 public class ChatApp extends Application {
-    private TempConfig temp;
 
     @Override
     public void onCreate() {
