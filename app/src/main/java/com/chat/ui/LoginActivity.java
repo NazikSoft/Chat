@@ -114,6 +114,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         finish();
                     }
                 })
+                .setCancelable(false)
                 .create();
         dialog.show();
     }
