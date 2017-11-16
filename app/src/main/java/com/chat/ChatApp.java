@@ -3,6 +3,7 @@ package com.chat;
 import android.app.Application;
 
 import com.chat.entity.TempConfig;
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.database.FirebaseDatabase;
 
 /**
@@ -16,6 +17,7 @@ public class ChatApp extends Application {
     public void onCreate() {
         super.onCreate();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        Fresco.initialize(this);
     }
 
     @Override
@@ -23,10 +25,4 @@ public class ChatApp extends Application {
         super.onTerminate();
     }
 
-    public TempConfig getTemp() {
-        if (temp == null)
-            temp = new TempConfig();
-
-        return temp;
-    }
 }

@@ -3,8 +3,10 @@ package com.chat.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
@@ -53,8 +55,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    private static final String TAG = "log_tag";
-
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         dao = new UserDao(handler);
 //        FirebaseAuth.getInstance().signOut();
         if (UserDao.isUserLogged()) {
-            toMain();
+            showTempDialog();
         }
 
         // Set up the login form.
@@ -80,28 +80,42 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-//        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                Log.i(TAG, "onEditorAction " + id + "  " + keyEvent);
-//                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-//                    attemptLogin();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                Toast.makeText(LoginActivity.this, R.string.text_login_successful, Toast.LENGTH_LONG).show();
                 attemptLogin();
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private void showTempDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Temp dialog for debug")
+                .setMessage("You can create new dialog with anyone registered user or go to already created your chat rooms")
+                .setPositiveButton("Create new", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(LoginActivity.this, TempActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .setNegativeButton("Go to created", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .create();
+        dialog.show();
     }
 
     private void initHandler() {
@@ -123,6 +137,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         };
     }
+
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
             return;
@@ -172,10 +187,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-//        if (mAuthTask != null) {
-//            return;
-//        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -214,8 +225,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
             dao.signInWithEmail(email, password);
-//            mAuthTask = new UserLoginTask(email, password);
-//            mAuthTask.execute((Void) null);
         }
     }
 
@@ -227,7 +236,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 5;
     }
 
     /**
@@ -316,70 +325,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
     }
-
-//    /**
-//     * Represents an asynchronous login/registration task used to authenticate
-//     * the user.
-//     */
-//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-//
-//        private final String mEmail;
-//        private final String mPassword;
-//
-//        UserLoginTask(String email, String password) {
-//            mEmail = email;
-//            mPassword = password;
-//        }
-//
-//        @Override
-//        protected Boolean doInBackground(Void... params) {
-//            // TODO: attempt authentication against a network service.
-//
-//            try {
-//                // Simulate network access.
-//                Thread.sleep(600);
-//            } catch (InterruptedException e) {
-//                return false;
-//            }
-//            if (DUMMY_CREDENTIALS != null)
-//                for (String credential : DUMMY_CREDENTIALS) {
-//                    String[] pieces = credential.split(":");
-//                    if (pieces[0].equals(mEmail)) {
-//                        // Account exists, return true if the password matches.
-//                        return pieces[1].equals(mPassword);
-//                    }
-//                }
-//
-//            // TODO: register the new account here.
-//
-//            return false;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(final Boolean success) {
-//            mAuthTask = null;
-//            showProgress(false);
-//            User user = new User(mEmail, mPassword, FirebaseInstanceId.getInstance().getToken(),new Date().getTime());
-//            if (success) {
-//                dao.update(user);
-//                Toast.makeText(LoginActivity.this, "Пользователь найден", Toast.LENGTH_LONG).show();
-//            } else {
-////                mPasswordView.setError(getString(R.string.error_incorrect_password));
-////                mPasswordView.requestFocus();
-//                dao.save(user);
-//                Toast.makeText(LoginActivity.this, "Пользователь зарегистрирован", Toast.LENGTH_LONG).show();
-//            }
-//            Log.i(TAG, "Auth: " + user.toString());
-//            ChatUtil.saveAuth(LoginActivity.this, user);
-//            toMain();
-//        }
-//
-//        @Override
-//        protected void onCancelled() {
-//            mAuthTask = null;
-//            showProgress(false);
-//        }
-//    }
 
     private void toMain() {
 //        Intent intent = new Intent(LoginActivity.this, TempActivity.class);

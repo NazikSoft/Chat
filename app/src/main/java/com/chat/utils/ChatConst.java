@@ -33,7 +33,8 @@ public class ChatConst {
     public final static int ACTION_IMAGE_CAPTURE = 10119;
     public final static int HANDLER_IMAGE_SAVE_OK = 10120;
     public final static int RECYCLER_LIST_CLICKED = 10121;
-    public static final int HANDLER_TOKENS_LIST = 101222;
+    public static final int HANDLER_TOKENS_LIST = 10122;
+    public static final int HANDLER_IMAGE_LIST = 10123;
 
 
     public static final String DATE_PARSE_REG_EXP = "%1$te %1$tm %1$tY";
@@ -45,4 +46,5 @@ public class ChatConst {
     public static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
     public static final String NOTIFICATION_ID = "generalNotificationChanel";
     public static final String EXTRA_CHAT_ID = "chatRoomIdExtra";
+    public static final String COLUMN_TEXT = "text";
 }

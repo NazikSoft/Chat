@@ -75,60 +75,7 @@ public class TempActivity extends AppCompatActivity {
             }
         });
 
-//        mFirebaseAdapter = new FirebaseRecyclerAdapter<User, ChatViewHolder>(options) {
-//            @Override
-//            public ChatViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-//                LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-//                return new ChatViewHolder(inflater.inflate(R.layout.item_user, viewGroup, false));
-//            }
-//
-//            @Override
-//            protected void onBindViewHolder(final ChatViewHolder viewHolder,
-//                                            int position,
-//                                            User user) {
-////                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-//                    String imageUrl = user.getImageUrl();
-//                    if (imageUrl.startsWith("gs://")) {
-//                        StorageReference storageReference = FirebaseStorage.getInstance()
-//                                .getReferenceFromUrl(imageUrl);
-//                        storageReference.getDownloadUrl().addOnCompleteListener(
-//                                new OnCompleteListener<Uri>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<Uri> task) {
-//                                        if (task.isSuccessful()) {
-//                                            String downloadUrl = task.getResult().toString();
-//                                            Glide.with(viewHolder.messageImageView.getContext())
-//                                                    .load(downloadUrl)
-//                                                    .into(viewHolder.messageImageView);
-//                                        } else {
-//                                            Log.w(TAG, "Getting download url was not successful.",
-//                                                    task.getException());
-//                                        }
-//                                    }
-//                                });
-//                    } else {
-//                        Picasso.with(viewHolder.messageImageView.getContext())
-//                                .load(user.get)
-//                                .into(viewHolder.messageImageView);
-//                    }
-//                    viewHolder.messageImageView.setVisibility(ImageView.VISIBLE);
-//                    viewHolder.messageTextView.setVisibility(TextView.GONE);
-//
-//
-//                viewHolder.messengerTextView.setText(user.getName());
-//                if (user.getPhotoUrl() == null) {
-//                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(TempActivity.this,
-//                            R.drawable.ic_account_circle_black_36dp));
-//                } else {
-//                    Glide.with(TempActivity.this)
-//                            .load(user.getPhotoUrl())
-//                            .into(viewHolder.messengerImageView);
-//                }
-//
-//            }
-//        };
         mLinearLayoutManager = new LinearLayoutManager(this);
-//        mLinearLayoutManager.setStackFromEnd(true);
 
         mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override

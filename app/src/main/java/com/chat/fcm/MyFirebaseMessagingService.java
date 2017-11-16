@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.chat.R;
 
+import com.chat.dao.net.UserDao;
 import com.chat.entity.Message;
 import com.chat.ui.MainActivity;
 import com.chat.utils.ChatConst;
@@ -37,12 +38,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Message message = ChatUtil.fromJson(str, Message.class);
             String chatRoomId = map.get("chatRoomId");
             Log.i(TAG, "Message data payload: " + "\n" + message);
-            if (handler == null)
+            if (handler == null) {
                 sendNotification(chatRoomId, message);
-            else {
-                MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
-                thePlayer.start();
-//                handler.obtainMessage(ChatConst.HANDLER_RECEIVE_MSG, chatRoom).sendToTarget();
+            } else {
+                if (!message.getUserId().equals(UserDao.getCurrentUserId())) {
+                    MediaPlayer thePlayer = MediaPlayer.create(getApplicationContext(), defaultSoundUri);
+                    thePlayer.start();
+                }
             }
         }
         if (remoteMessage.getNotification() != null) {

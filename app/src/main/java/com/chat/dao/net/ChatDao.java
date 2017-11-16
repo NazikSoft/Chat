@@ -39,19 +39,19 @@ public class ChatDao extends ObjectDao {
 
     private DatabaseReference chatRef;
     private DatabaseReference userRef;
-    private UserDao userDao;
+    private Handler handler;
     // temp data
     private Map<String, Object> tempMap;
     private int counter;
 
     public ChatDao(Handler handler) {
         super(handler);
+        this.handler = handler;
         if (chatRef == null) {
             chatRef = FirebaseDatabase.getInstance().getReference(ChatConst.CHAT_DATABASE_PATH);
             chatRef.keepSynced(true);
         }
         userRef = FirebaseDatabase.getInstance().getReference(ChatConst.USER_DATABASE_PATH);
-        userDao = new UserDao(handler);
         tempMap = new HashMap<>();
     }
 
@@ -66,7 +66,7 @@ public class ChatDao extends ObjectDao {
                     error(ChatConst.HANDLER_RESULT_ERR);
                     return;
                 }
-                Map<String, Integer> temp =(HashMap<String, Integer>) dataSnapshot.getValue();
+                Map<String, Integer> temp = (HashMap<String, Integer>) dataSnapshot.getValue();
                 if (temp != null || !temp.isEmpty()) {
                     Set<String> participantsIds = temp.keySet();
                     participantsIds.remove(UserDao.getCurrentUserId());
@@ -87,7 +87,7 @@ public class ChatDao extends ObjectDao {
         counter = 0;
         for (String participantsId : participantsIds) {
             userRef.child(participantsId)
-                   .child(ChatConst.COLUMN_TOKEN)
+                    .child(ChatConst.COLUMN_TOKEN)
                     .orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -253,7 +253,7 @@ public class ChatDao extends ObjectDao {
         });
     }
 
-    public void uploadImage(Context context, String chatRoomId, final Uri uri) {
+    public void uploadImage(Context context, final String chatRoomId, final Uri uri) {
         Log.d(ChatConst.TAG, "Uri: " + uri.toString());
         DatabaseReference messageRef = chatRef.child(chatRoomId).child(ChatConst.COLUMN_MESSAGES);
 
@@ -279,7 +279,7 @@ public class ChatDao extends ObjectDao {
                     String key = databaseReference.getKey();
                     StorageReference storageReference =
                             FirebaseStorage.getInstance()
-                                    .getReference(UserDao.getCurrentUserId())
+                                    .getReference(chatRoomId)
                                     .child(key)
                                     .child(uri.getLastPathSegment());
                     putImageInStorage(storageReference, uri, databaseReference, message);
@@ -297,33 +297,23 @@ public class ChatDao extends ObjectDao {
                 .setValue(message);
     }
 
-    private void putImageInStorage(StorageReference storageReference, Uri uri, final DatabaseReference databaseReference, final Message message) {
+    private void putImageInStorage(StorageReference storageReference, Uri uri, final DatabaseReference messageReference, final Message message) {
+        // upload img to storage
         storageReference.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
+                    // update is successful, get img Url and update storage data
                     Uri downloadUrl = task.getResult().getDownloadUrl();
                     if (downloadUrl == null) {
                         error(ChatConst.HANDLER_RESULT_ERR);
                         return;
                     }
+                    // get img Url
                     String img = downloadUrl.toString();
                     message.setImageUrl(img);
-
-                    // update image data in database
-                    databaseReference.child(ChatConst.COLUMN_IMAGE_URL)
-                            .setValue(img).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                success(ChatConst.HANDLER_IMAGE_SAVE_OK, message);
-                                String chatRoomId = databaseReference.getParent().getParent().getKey();
-                                updateLastMessage(chatRoomId, message);
-                            } else {
-                                error(ChatConst.HANDLER_RESULT_ERR);
-                            }
-                        }
-                    });
+                    // update new img data in storage
+                    updateNewImgData(messageReference.getParent().getParent(), message);
                 } else {
                     Log.w(ChatConst.TAG, "Image upload task was not successful.", task.getException());
                 }
@@ -331,10 +321,67 @@ public class ChatDao extends ObjectDao {
         });
     }
 
+    private void updateNewImgData(final DatabaseReference currentChatReference, final Message message) {
+        // get message id
+        String messageId = message.getId();
+        // create update for update
+        Map<String, Object> updateData = new HashMap<>();
+        // add data to chatroom images pool
+        updateData.put(ChatConst.COLUMN_IMAGE_URL + "/" + messageId, message.getImageUrl());
+        // add update to message imageUrl value
+        updateData.put(ChatConst.COLUMN_MESSAGES + "/" + messageId + "/" + ChatConst.COLUMN_IMAGE_URL, message.getImageUrl());
+        // update in database
+        currentChatReference.updateChildren(updateData).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    success(ChatConst.HANDLER_IMAGE_SAVE_OK, message);
+                    String chatRoomId = currentChatReference.getKey();
+                    updateLastMessage(chatRoomId, message);
+                } else {
+                    error(ChatConst.HANDLER_RESULT_ERR);
+                }
+            }
+        });
+
+    }
+
     public void updateReadMessageCount(String chatRoomId, int messageCount) {
         chatRef.child(chatRoomId)
                 .child(ChatConst.COLUMN_USER_READ_MESSAGE_COUNT)
                 .child(UserDao.getCurrentUserId())
                 .setValue(messageCount);
+    }
+
+    public void getChatroomImg(String chatRoomId, final String clickedMessageId) {
+        chatRef.child(chatRoomId)
+                .child(ChatConst.COLUMN_IMAGE_URL)
+                .orderByValue().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> imgList = new ArrayList<>();
+                int clickedImgIndex = -1;
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        imgList.add(snapshot.getValue(String.class));
+                        // if current img clicked, save it list position
+                        if (snapshot.getKey().equals(clickedMessageId)){
+                            clickedImgIndex = imgList.size()-1;
+                        }
+                    }
+                }
+                // send result
+                android.os.Message msg = android.os.Message.obtain();
+                msg.what = ChatConst.HANDLER_IMAGE_LIST;
+                msg.arg1 = clickedImgIndex;
+                msg.obj = imgList;
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                error(ChatConst.HANDLER_RESULT_ERR);
+            }
+        });
     }
 }

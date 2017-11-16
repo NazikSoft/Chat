@@ -22,4 +22,5 @@
     <string name="text_error">Чтото пошло не так, попробуйте снова</string>
     <string name="text_chat_load_error">Ошибка загрузки чата</string>
     <string name="text_get_image_message">Получено новое изображение</string>
+    <string name="text_login_successful">Ви успешно залогинились</string>
 </resources>

@@ -47,6 +47,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
+import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.Date;
 import java.util.List;
@@ -147,10 +148,10 @@ public class ChatFragment extends Fragment {
                         .build();
         // init adapter
         adapter = new MessageAdapter(getActivity(), options, new MessageAdapter.OnImgMessageClickListener() {
-
             @Override
-            public void oClick(String path) {
-                showImgPreview(path);
+            public void oClick(String messageId) {
+                // get all chat img and mark clicked img
+                chatDao.getChatroomImg(chatRoomId, messageId);
             }
         });
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
@@ -175,17 +176,22 @@ public class ChatFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
-    private void showImgPreview(String path) {
-        Dialog settingsDialog = new Dialog(getActivity());
-        settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        View view = getLayoutInflater().inflate(R.layout.image_preview, null);
-        ImageView imageView = (ImageView) view.findViewById(R.id.image);
-        Picasso.with(getActivity())
-                .load(path)
-                .placeholder(R.drawable.placeholder)
-                .into(imageView);
-        settingsDialog.setContentView(view);
-        settingsDialog.show();
+    private void showImgPreview(List<String> imgList, int startPosition) {
+        new ImageViewer.Builder(getActivity(), imgList.toArray())
+                .setStartPosition(startPosition)
+                .hideStatusBar(false)
+                .show();
+
+//        Dialog settingsDialog = new Dialog(getActivity());
+//        settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+//        View view = getLayoutInflater().inflate(R.layout.image_preview, null);
+//        ImageView imageView = (ImageView) view.findViewById(R.id.image);
+//        Picasso.with(getActivity())
+//                .load(path)
+//                .placeholder(R.drawable.placeholder)
+//                .into(imageView);
+//        settingsDialog.setContentView(view);
+//        settingsDialog.show();
     }
 
     private void keyboardSensor() {
@@ -291,6 +297,15 @@ public class ChatFragment extends Fragment {
                     case ChatConst.HANDLER_TOKENS_LIST:
                         List<String> tokenList = (List<String>) msg.obj;
                         sendFCM(fcmMessage, tokenList);
+                        break;
+
+                    case ChatConst.HANDLER_IMAGE_LIST:
+                        List<String> imgList = (List<String>) msg.obj;
+                        if (imgList == null || imgList.isEmpty()){
+                            return;
+                        }
+                                                int clickedImgPosition = msg.arg1;
+                        showImgPreview(imgList, clickedImgPosition);
                 }
             }
         };

@@ -41,7 +41,7 @@ public class MessageAdapter extends FirebaseRecyclerAdapter<Message, MessageAdap
     private OnImgMessageClickListener listener;
 
     public interface OnImgMessageClickListener {
-        void oClick(String path);
+        void oClick(String messageId);
     }
 
     /**
@@ -93,7 +93,7 @@ public class MessageAdapter extends FirebaseRecyclerAdapter<Message, MessageAdap
             holder.messageImg.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
-                    listener.oClick(message.getImageUrl());
+                    listener.oClick(message.getId());
                 }
             });
 
